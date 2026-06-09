@@ -8,38 +8,38 @@
 ---
 
 ## Phase 1: Environment & Scaffolding
-- [ ] `[S]` Initialize Git repo with branch strategy (`main`, `develop`, `candidate-dev`, `recruiter-dev`).
-- [ ] `[S]` Create `frontend/` monorepo with npm workspaces.
-- [ ] `[S]` Scaffold `frontend/apps/candidate` (Vite + React).
-- [ ] `[S]` Scaffold `frontend/apps/recruiter` (Vite + React).
-- [ ] `[S]` Create `frontend/shared/` package (components, hooks, theme, api).
-- [ ] `[S]` Create `backend/` directory; setup Python venv.
-- [ ] `[S]` Create `backend/requirements.txt` (FastAPI, Uvicorn, Motor, Pydantic, etc.).
-- [ ] `[S]` Scaffold FastAPI app structure (`main.py`, `core/config.py`, `core/database.py`).
+- [x] `[S]` Initialize Git repo with branch strategy (`main`, `develop`, `candidate-dev`, `recruiter-dev`).
+- [x] `[S]` Create `frontend/` monorepo with npm workspaces.
+- [x] `[S]` Scaffold `frontend/apps/candidate` (Vite + React).
+- [x] `[S]` Scaffold `frontend/apps/recruiter` (Vite + React).
+- [x] `[S]` Create `frontend/shared/` package (components, hooks, theme, api).
+- [x] `[S]` Create `backend/` directory; setup Python venv.
+- [x] `[S]` Create `backend/requirements.txt` (FastAPI, Uvicorn, Motor, Pydantic, etc.).
+- [x] `[S]` Scaffold FastAPI app structure (`main.py`, `core/config.py`, `core/database.py`).
 - [ ] `[S]` Create `backend/uploads/` directory for local file storage.
 - [ ] `[S]` Create subdirectories: `uploads/resumes/`, `uploads/logos/`, `uploads/avatars/`.
 
 ## Phase 2: Auth & Core Infrastructure
-- [ ] `[S]` Implement JWT token generation in `core/security.py`.
-- [ ] `[S]` Build `POST /api/auth/register` endpoint.
-- [ ] `[S]` Build `POST /api/auth/login` endpoint (OAuth2PasswordRequestForm).
-- [ ] `[S]` Create `User` Pydantic model with role enum (`CANDIDATE`, `RECRUITER`, `ADMIN`).
-- [ ] `[S]` Create `users` MongoDB collection.
-- [ ] `[S]` Setup CORS middleware in FastAPI.
-- [ ] `[S]` Create shared Axios client with JWT interceptor.
-- [ ] `[S]` Create `useAuth` Zustand store in `frontend/shared/`.
+- [x] `[S]` Implement JWT token generation in `core/security.py`.
+- [x] `[S]` Build `POST /api/auth/register` endpoint.
+- [x] `[S]` Build `POST /api/auth/login` endpoint (OAuth2PasswordRequestForm).
+- [x] `[S]` Create `User` Pydantic model with role enum (`CANDIDATE`, `RECRUITER`, `ADMIN`).
+- [x] `[S]` Create `users` MongoDB collection.
+- [x] `[S]` Setup CORS middleware in FastAPI.
+- [x] `[S]` Create shared Axios client with JWT interceptor.
+- [x] `[S]` Create `useAuth` Zustand store in `frontend/shared/`.
 
 ## Phase 3: Company Domain
-- [ ] `[R]` Create `Company` Pydantic model (name, logo_url, description, website, recruiters[]).
-- [ ] `[R]` Create `companies` MongoDB collection.
+- [x] `[R]` Create `Company` Pydantic model (name, logo_url, description, website, recruiters[]).
+- [x] `[R]` Create `companies` MongoDB collection.
 - [ ] `[R]` Build `POST /api/companies` endpoint (create company).
 - [ ] `[R]` Build `GET /api/companies` endpoint (list recruiter's companies).
 - [ ] `[R]` Build `GET /api/companies/{id}` endpoint (company details).
 - [ ] `[R]` Build `PUT /api/companies/{id}` endpoint (update company).
-- [ ] `[R]` Update `User` model to store `company_id` for recruiters.
+- [x] `[R]` Update `User` model to store `company_id` for recruiters.
 
 ## Phase 4: Recruiter Domain (Backend)
-- [ ] `[R]` Create `Job` Pydantic model with `company_id` field.
+- [x] `[R]` Create `Job` Pydantic model with `company_id` field.
 - [ ] `[R]` Create `Ranking` Pydantic model.
 - [ ] `[R]` Create `Offer` Pydantic model.
 - [ ] `[R]` Build `POST /api/recruiter/jobs` router.
@@ -57,9 +57,9 @@
 - [ ] `[C]` Add job embedding for semantic search.
 
 ## Phase 6: Candidate Domain (Backend)
-- [ ] `[C]` Create `CandidateProfile` Pydantic model.
-- [ ] `[C]` Create `Resume` Pydantic model (with `file_path` for local storage).
-- [ ] `[C]` Create `Application` Pydantic model.
+- [x] `[C]` Create `CandidateProfile` Pydantic model.
+- [x] `[C]` Create `Resume` Pydantic model (with `file_path` for local storage).
+- [x] `[C]` Create `Application` Pydantic model.
 - [ ] `[C]` Build `GET /api/candidate/profile` router.
 - [ ] `[C]` Build `PUT /api/candidate/profile` router.
 - [ ] `[C]` Build `POST /api/candidate/resume` (UploadFile + save to `uploads/resumes/` + parse).
@@ -69,7 +69,7 @@
 
 ## Phase 7: Agent Orchestration (Explicit Capabilities)
 - [ ] `[S]` Setup `apps/agents/` with OpenAI / Anthropic LangChain client.
-- [ ] `[S]` Create `AgentEvent` Pydantic model and `agent_events` collection.
+- [x] `[S]` Create `AgentEvent` Pydantic model and `agent_events` collection.
 - [ ] `[C]` Define **Career Agent** capabilities:
   - [ ] `[C]` Resume Review: analyze resume against industry standards.
   - [ ] `[C]` Skill Gap Analysis: compare skills vs. job requirements.
@@ -119,10 +119,10 @@
 - [ ] `[S]` *(Future)*: Migrate to Cloudinary / S3 / Supabase when scaling.
 
 ## Phase 11: Candidate Frontend
-- [ ] `[C]` Implement shared design tokens (DRD: colors, typography, motion).
-- [ ] `[C]` Build shared UI components in `frontend/shared/`.
-- [ ] `[C]` Setup Candidate app routing (`/`, `/login`, `/profile`, `/jobs`, `/jobs/:id`, `/applications`, `/offers`, `/agent`).
-- [ ] `[C]` Build Candidate Login / Register pages.
+- [x] `[C]` Implement shared design tokens (DRD: colors, typography, motion).
+- [x] `[C]` Build shared UI components in `frontend/shared/`.
+- [x] `[C]` Setup Candidate app routing (`/`, `/login`, `/profile`, `/jobs`, `/jobs/:id`, `/applications`, `/offers`, `/agent`).
+- [x] `[C]` Build Candidate Login / Register pages.
 - [ ] `[C]` Build **Job Discovery** page: search, filter, browse jobs with company info.
 - [ ] `[C]` Build **Job Detail** page: view requirements, click Apply.
 - [ ] `[C]` Build **Profile** page: resume upload, skill gap analysis.
@@ -130,11 +130,11 @@
 - [ ] `[C]` Build **Career Agent** chat interface.
 
 ## Phase 12: Recruiter Frontend
-- [ ] `[R]` Reuse shared design tokens and components.
+- [x] `[R]` Reuse shared design tokens and components.
 - [ ] `[R]` Setup Recruiter app routing (`/`, `/login`, `/companies`, `/jobs`, `/jobs/:id`, `/candidates`).
-- [ ] `[R]` Build Recruiter Login / Register pages.
+- [x] `[R]` Build Recruiter Login / Register pages.
 - [ ] `[R]` Build **Company Management**: create/edit company profile, upload logo.
-- [ ] `[R]` Build **Dashboard**: open roles, pipeline metrics, analytics.
+- [x] `[R]` Build **Dashboard**: open roles, pipeline metrics, analytics.
 - [ ] `[R]` Build **Create Job** form (linked to company).
 - [ ] `[R]` Build **Job Details** page: AI-ranked applicant table.
 - [ ] `[R]` Build **Candidate View**: AI summary, resume viewer.
