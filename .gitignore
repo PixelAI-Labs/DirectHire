@@ -4,6 +4,7 @@ dist/
 build/
 .npm
 npm-debug.log*
+*.tsbuildinfo
 
 # Python / Backend
 __pycache__/
@@ -14,10 +15,15 @@ venv/
 ENV/
 env/
 .pytest_cache/
+.mypy_cache/
 
 # DirectHire Specific
-backend/uploads/
-.graphify/
+backend/uploads/resumes/*
+backend/uploads/logos/*
+backend/uploads/avatars/*
+backend/uploads/resumes/.gitkeep
+backend/uploads/logos/.gitkeep
+backend/uploads/avatars/.gitkeep
 
 # Environment Variables
 .env
@@ -36,3 +42,23 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Logs
+logs/
+*.log
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+.cache/
+temp/
+tmp/
+.kimchi/
+
+# Graphify specific ignores (only ignore caches/hidden files, keep final graph)
+graphify-out/.*
+graphify-out/cache/
