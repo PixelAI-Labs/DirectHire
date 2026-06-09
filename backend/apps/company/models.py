@@ -7,6 +7,7 @@ class Company(Document):
     description: str = ""
     website: str | None = None
     recruiters: list[str] = []
+    created_by: str = ""
 
     class Settings:
         name = "companies"

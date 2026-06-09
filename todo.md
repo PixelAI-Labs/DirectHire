@@ -32,10 +32,10 @@
 ## Phase 3: Company Domain
 - [x] `[R]` Create `Company` Pydantic model (name, logo_url, description, website, recruiters[]).
 - [x] `[R]` Create `companies` MongoDB collection.
-- [ ] `[R]` Build `POST /api/companies` endpoint (create company).
-- [ ] `[R]` Build `GET /api/companies` endpoint (list recruiter's companies).
-- [ ] `[R]` Build `GET /api/companies/{id}` endpoint (company details).
-- [ ] `[R]` Build `PUT /api/companies/{id}` endpoint (update company).
+- [x] `[R]` Build `POST /api/companies` endpoint (create company).
+- [x] `[R]` Build `GET /api/companies` endpoint (list recruiter's companies).
+- [x] `[R]` Build `GET /api/companies/{id}` endpoint (company details).
+- [x] `[R]` Build `PUT /api/companies/{id}` endpoint (update company).
 - [x] `[R]` Update `User` model to store `company_id` for recruiters.
 
 ## Phase 4: Recruiter Domain (Backend)
