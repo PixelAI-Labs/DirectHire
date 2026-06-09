@@ -16,8 +16,8 @@
 - [x] `[S]` Create `backend/` directory; setup Python venv.
 - [x] `[S]` Create `backend/requirements.txt` (FastAPI, Uvicorn, Motor, Pydantic, etc.).
 - [x] `[S]` Scaffold FastAPI app structure (`main.py`, `core/config.py`, `core/database.py`).
-- [ ] `[S]` Create `backend/uploads/` directory for local file storage.
-- [ ] `[S]` Create subdirectories: `uploads/resumes/`, `uploads/logos/`, `uploads/avatars/`.
+- [x] `[S]` Create `backend/uploads/` directory for local file storage.
+- [x] `[S]` Create subdirectories: `uploads/resumes/`, `uploads/logos/`, `uploads/avatars/`.
 
 ## Phase 2: Auth & Core Infrastructure
 - [x] `[S]` Implement JWT token generation in `core/security.py`.
