@@ -21,9 +21,9 @@ env/
 backend/uploads/resumes/*
 backend/uploads/logos/*
 backend/uploads/avatars/*
-backend/uploads/resumes/.gitkeep
-backend/uploads/logos/.gitkeep
-backend/uploads/avatars/.gitkeep
+!backend/uploads/resumes/.gitkeep
+!backend/uploads/logos/.gitkeep
+!backend/uploads/avatars/.gitkeep
 
 # Environment Variables
 .env
