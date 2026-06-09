@@ -2,6 +2,7 @@
 from beanie import Document
 from datetime import datetime
 
+
 class Job(Document):
     company_id: str
     title: str
@@ -18,3 +19,31 @@ class Job(Document):
 
     class Settings:
         name = "jobs"
+
+
+class Ranking(Document):
+    job_id: str
+    candidate_id: str
+    resume_score: float = 0.0
+    assessment_score: float = 0.0
+    match_score: float = 0.0
+    overall_score: float = 0.0
+    ranking_formula: dict = {}
+    created_at: datetime = datetime.utcnow()
+
+    class Settings:
+        name = "rankings"
+
+
+class Offer(Document):
+    job_id: str
+    candidate_id: str
+    recruiter_id: str
+    salary_offered: float
+    benefits: str = ""
+    status: str = "PENDING"
+    message: str = ""
+    created_at: datetime = datetime.utcnow()
+
+    class Settings:
+        name = "offers"

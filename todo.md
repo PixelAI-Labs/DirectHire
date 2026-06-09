@@ -40,14 +40,14 @@
 
 ## Phase 4: Recruiter Domain (Backend)
 - [x] `[R]` Create `Job` Pydantic model with `company_id` field.
-- [ ] `[R]` Create `Ranking` Pydantic model.
-- [ ] `[R]` Create `Offer` Pydantic model.
-- [ ] `[R]` Build `POST /api/recruiter/jobs` router.
-- [ ] `[R]` Build `GET /api/recruiter/jobs` router.
-- [ ] `[R]` Build `GET /api/recruiter/jobs/{id}/candidates` router (ranked).
-- [ ] `[R]` Build `GET /api/recruiter/rankings` router.
-- [ ] `[R]` Build `POST /api/recruiter/offers` router.
-- [ ] `[R]` Implement candidate ranking formula (Resume 25%, Assessment 30%, etc.).
+- [x] `[R]` Create `Ranking` Pydantic model.
+- [x] `[R]` Create `Offer` Pydantic model.
+- [x] `[R]` Build `POST /api/recruiter/jobs` router.
+- [x] `[R]` Build `GET /api/recruiter/jobs` router.
+- [x] `[R]` Build `GET /api/recruiter/jobs/{id}/candidates` router (ranked).
+- [x] `[R]` Build `GET /api/recruiter/rankings` router.
+- [x] `[R]` Build `POST /api/recruiter/offers` router.
+- [x] `[R]` Implement candidate ranking formula (Resume 25%, Assessment 30%, etc.).
 
 ## Phase 5: Job Discovery System (Public)
 - [ ] `[C]` Create public `GET /api/jobs` endpoint (search, filter, pagination).

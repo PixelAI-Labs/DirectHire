@@ -1,15 +1,260 @@
 """Recruiter Router — Jobs, Rankings, Offers"""
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException, status
+from beanie.operators import In
+
+from apps.auth.models import User, UserRole
+from apps.auth.security import get_current_user
+from apps.candidate.models import Application, CandidateProfile
+from apps.company.models import Company
+from apps.recruiter.models import Job, Offer, Ranking
+from apps.recruiter.schemas import (
+    CandidateRankOut,
+    JobCreate,
+    JobOut,
+    OfferCreate,
+    OfferOut,
+    RankingOut,
+)
+
 router = APIRouter()
 
-@router.get("/jobs")
-async def list_jobs(): return {"message": "List jobs — WIP"}
 
-@router.post("/jobs")
-async def create_job(): return {"message": "Create job — WIP"}
+def _require_recruiter(user: User) -> None:
+    if user.role not in (UserRole.RECRUITER, UserRole.ADMIN):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Recruiter access required",
+        )
 
-@router.get("/rankings")
-async def get_rankings(): return {"message": "Get rankings — WIP"}
 
-@router.post("/offers")
-async def create_offer(): return {"message": "Create offer — WIP"}
+def compute_candidate_score(
+    resume_score: float = 0.0,
+    assessment_score: float = 0.0,
+    match_score: float = 0.0,
+    weights: dict = None,
+) -> float:
+    weights = weights or {"resume": 0.25, "assessment": 0.30, "match": 0.45}
+    overall = (
+        resume_score * weights["resume"]
+        + assessment_score * weights["assessment"]
+        + match_score * weights["match"]
+    )
+    return round(min(overall, 100.0), 2)
+
+
+@router.post("/jobs", response_model=JobOut, status_code=status.HTTP_201_CREATED)
+async def create_job(
+    payload: JobCreate,
+    current_user: User = Depends(get_current_user),
+):
+    _require_recruiter(current_user)
+    if current_user.company_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Recruiter must be associated with a company",
+        )
+
+    company = await Company.find_one(Company.id == current_user.company_id)
+    if company is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Company not found",
+        )
+
+    job = Job(
+        company_id=current_user.company_id,
+        title=payload.title,
+        description=payload.description,
+        requirements=payload.requirements,
+        skills=payload.skills,
+        location=payload.location,
+        salary_min=payload.salary_min,
+        salary_max=payload.salary_max,
+        role_type=payload.role_type,
+        remote_option=payload.remote_option,
+        status="OPEN",
+    )
+    await job.insert()
+    return JobOut(
+        id=str(job.id),
+        company_id=job.company_id,
+        title=job.title,
+        description=job.description,
+        requirements=job.requirements,
+        skills=job.skills,
+        location=job.location,
+        salary_min=job.salary_min,
+        salary_max=job.salary_max,
+        role_type=job.role_type,
+        remote_option=job.remote_option,
+        status=job.status,
+        created_at=job.created_at,
+    )
+
+
+@router.get("/jobs", response_model=list[JobOut])
+async def list_jobs(current_user: User = Depends(get_current_user)):
+    _require_recruiter(current_user)
+
+    if current_user.role == UserRole.ADMIN:
+        jobs = await Job.find_all().to_list()
+    else:
+        jobs = await Job.find(Job.company_id == current_user.company_id).to_list()
+
+    return [
+        JobOut(
+            id=str(j.id),
+            company_id=j.company_id,
+            title=j.title,
+            description=j.description,
+            requirements=j.requirements,
+            skills=j.skills,
+            location=j.location,
+            salary_min=j.salary_min,
+            salary_max=j.salary_max,
+            role_type=j.role_type,
+            remote_option=j.remote_option,
+            status=j.status,
+            created_at=j.created_at,
+        )
+        for j in jobs
+    ]
+
+
+@router.get("/jobs/{job_id}/candidates", response_model=list[CandidateRankOut])
+async def get_job_candidates(
+    job_id: str,
+    current_user: User = Depends(get_current_user),
+):
+    _require_recruiter(current_user)
+
+    job = await Job.find_one(Job.id == job_id)
+    if job is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found",
+        )
+
+    if current_user.role == UserRole.RECRUITER and job.company_id != current_user.company_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to view candidates for this job",
+        )
+
+    applications = await Application.find(Application.job_id == job_id).to_list()
+
+    results: list[CandidateRankOut] = []
+    for app in applications:
+        ranking = await Ranking.find_one(
+            Ranking.job_id == job_id,
+            Ranking.candidate_id == app.candidate_id,
+        )
+        resume_score = ranking.resume_score if ranking else 0.0
+        assessment_score = ranking.assessment_score if ranking else 0.0
+        match_score = app.match_score or 0.0
+        overall_score = compute_candidate_score(resume_score, assessment_score, match_score)
+
+        candidate_profile = await CandidateProfile.find_one(
+            CandidateProfile.user_id == app.candidate_id
+        )
+        candidate_user = await User.find_one(User.id == app.candidate_id)
+
+        if candidate_user is None:
+            continue
+
+        results.append(
+            CandidateRankOut(
+                candidate_id=app.candidate_id,
+                full_name=candidate_user.full_name,
+                email=candidate_user.email,
+                resume_score=resume_score,
+                assessment_score=assessment_score,
+                match_score=match_score,
+                overall_score=overall_score,
+                skills=candidate_profile.skills if candidate_profile else [],
+                application_status=app.status,
+            )
+        )
+
+    results.sort(key=lambda x: x.overall_score, reverse=True)
+    return results
+
+
+@router.get("/rankings", response_model=list[RankingOut])
+async def get_rankings(current_user: User = Depends(get_current_user)):
+    _require_recruiter(current_user)
+
+    if current_user.role == UserRole.ADMIN:
+        rankings = await Ranking.find_all().to_list()
+    else:
+        jobs = await Job.find(Job.company_id == current_user.company_id).to_list()
+        if not jobs:
+            return []
+
+        job_ids = [str(j.id) for j in jobs]
+        rankings = await Ranking.find(In(Ranking.job_id, job_ids)).to_list()
+
+    return [
+        RankingOut(
+            id=str(r.id),
+            job_id=r.job_id,
+            candidate_id=r.candidate_id,
+            resume_score=r.resume_score,
+            assessment_score=r.assessment_score,
+            match_score=r.match_score,
+            overall_score=r.overall_score,
+            created_at=r.created_at,
+        )
+        for r in rankings
+    ]
+
+
+@router.post("/offers", response_model=OfferOut, status_code=status.HTTP_201_CREATED)
+async def create_offer(
+    payload: OfferCreate,
+    current_user: User = Depends(get_current_user),
+):
+    _require_recruiter(current_user)
+
+    job = await Job.find_one(Job.id == payload.job_id)
+    if job is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found",
+        )
+
+    if current_user.role == UserRole.RECRUITER and job.company_id != current_user.company_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to create offers for this job",
+        )
+
+    candidate = await User.find_one(User.id == payload.candidate_id, User.role == UserRole.CANDIDATE)
+    if candidate is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Candidate not found",
+        )
+
+    offer = Offer(
+        job_id=payload.job_id,
+        candidate_id=payload.candidate_id,
+        recruiter_id=str(current_user.id),
+        salary_offered=payload.salary_offered,
+        benefits=payload.benefits,
+        message=payload.message,
+        status="PENDING",
+    )
+    await offer.insert()
+
+    return OfferOut(
+        id=str(offer.id),
+        job_id=offer.job_id,
+        candidate_id=offer.candidate_id,
+        recruiter_id=offer.recruiter_id,
+        salary_offered=offer.salary_offered,
+        benefits=offer.benefits,
+        status=offer.status,
+        message=offer.message,
+        created_at=offer.created_at,
+    )
