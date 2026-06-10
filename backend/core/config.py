@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     # AI
     OPENAI_API_KEY: str = ""
     ANTHROPIC_API_KEY: str = ""
+    GEMMA_API_KEY: str = ""
+    GEMMA_API_BASE: str = "https://api.groq.com/openai/v1" # Default to Groq or any OpenAI compatible endpoint
+    GEMMA_MODEL_NAME: str = "gemma-27b-it"
 
     # Email
     SMTP_HOST: str = ""
