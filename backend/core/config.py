@@ -23,12 +23,12 @@ class Settings(BaseSettings):
     # CORS
     ALLOWED_ORIGINS: List[str] = ["http://localhost:5173", "http://localhost:5174"]
 
-    # AI
-    OPENAI_API_KEY: str = ""
-    ANTHROPIC_API_KEY: str = ""
+    # AI APIs
     GEMMA_API_KEY: str = ""
-    GEMMA_API_BASE: str = "https://api.groq.com/openai/v1" # Default to Groq or any OpenAI compatible endpoint
-    GEMMA_MODEL_NAME: str = "gemma-27b-it"
+    GEMMA_API_BASE_URL: str = "https://generativelanguage.googleapis.com/v1beta"
+    GEMMA_E4B_MODEL: str = "gemma-4-26b-a4b-it"
+    GEMMA_MOE_MODEL: str = "gemma-4-31b-it"
+    GEMMA_DENSE_MODEL: str = "gemma-4-31b-it"
 
     # Email
     SMTP_HOST: str = ""
