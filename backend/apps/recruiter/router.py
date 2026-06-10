@@ -61,6 +61,9 @@ async def create_job(
             detail="Company not found",
         )
 
+    # Generate mock embedding for semantic search (will be replaced in Phase 7)
+    mock_embedding = [0.0] * 1536
+
     job = Job(
         company_id=current_user.company_id,
         title=payload.title,
@@ -73,6 +76,7 @@ async def create_job(
         role_type=payload.role_type,
         remote_option=payload.remote_option,
         status="OPEN",
+        embedding=mock_embedding,
     )
     await job.insert()
     return JobOut(

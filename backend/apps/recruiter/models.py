@@ -15,10 +15,15 @@ class Job(Document):
     role_type: str = "FULL_TIME"
     remote_option: str = "HYBRID"
     status: str = "OPEN"
+    embedding: list[float] | None = None
     created_at: datetime = datetime.utcnow()
 
     class Settings:
         name = "jobs"
+        indexes = [
+            ("title", "text"),
+            ("description", "text"),
+        ]
 
 
 class Ranking(Document):
