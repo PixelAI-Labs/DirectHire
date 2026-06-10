@@ -14,7 +14,7 @@ This plan maps the PRD, DRD, and System Architecture into concrete, sequential b
 | Styling | Vanilla CSS with Design Tokens (DRD aligned) |
 | Backend | FastAPI, Uvicorn, Motor (async MongoDB) |
 | Database | MongoDB Atlas |
-| AI / Agents | OpenAI / Anthropic via LangChain |
+| AI / Agents | Hybrid: Gemma (Existing Agents), Gemini 3.1 Pro (Main Brain), Ollama STT/TTS via LangChain |
 | File Storage | Local filesystem (`backend/uploads/`) |
 | Notifications | In-app + Email (SMTP), later WebSocket + Push |
 | Deployment | Vercel (Frontend), Railway (Backend) |
@@ -133,7 +133,7 @@ directhire/
 **Goal**: AI agents have concrete, implementable capabilities.
 
 **Shared**
-- [ ] Setup `apps/agents/` with OpenAI/LangChain clients.
+- [ ] Setup `apps/agents/` with Gemini 3.1 Pro client (Main Brain) alongside existing Gemma configuration, plus Ollama (STT/TTS).
 - [ ] Create `AgentEvent` model and `agent_events` collection.
 - [ ] Build **Career Agent** with explicit capabilities:
   - **Resume Review**: Analyze resume against industry standards.

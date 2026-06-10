@@ -12,6 +12,7 @@ import { Applications } from './pages/Applications'
 import { Offers } from './pages/Offers'
 import { Agent } from './pages/Agent'
 import { NotFound } from './pages/NotFound'
+import { ProtectedRoute, PublicRoute } from '@directhire/shared'
 
 const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <motion.div
@@ -32,15 +33,78 @@ const App: React.FC = () => {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Layout />}>
-          <Route index element={<PageWrapper><Home /></PageWrapper>} />
-          <Route path="login" element={<PageWrapper><Login /></PageWrapper>} />
-          <Route path="register" element={<PageWrapper><Register /></PageWrapper>} />
-          <Route path="profile" element={<PageWrapper><Profile /></PageWrapper>} />
-          <Route path="jobs" element={<PageWrapper><Jobs /></PageWrapper>} />
-          <Route path="jobs/:id" element={<PageWrapper><JobDetail /></PageWrapper>} />
-          <Route path="applications" element={<PageWrapper><Applications /></PageWrapper>} />
-          <Route path="offers" element={<PageWrapper><Offers /></PageWrapper>} />
-          <Route path="agent" element={<PageWrapper><Agent /></PageWrapper>} />
+          <Route
+            index
+            element={
+              <ProtectedRoute>
+                <PageWrapper><Home /></PageWrapper>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="login"
+            element={
+              <PublicRoute>
+                <PageWrapper><Login /></PageWrapper>
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="register"
+            element={
+              <PublicRoute>
+                <PageWrapper><Register /></PageWrapper>
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="profile"
+            element={
+              <ProtectedRoute>
+                <PageWrapper><Profile /></PageWrapper>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="jobs"
+            element={
+              <ProtectedRoute>
+                <PageWrapper><Jobs /></PageWrapper>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="jobs/:id"
+            element={
+              <ProtectedRoute>
+                <PageWrapper><JobDetail /></PageWrapper>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="applications"
+            element={
+              <ProtectedRoute>
+                <PageWrapper><Applications /></PageWrapper>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="offers"
+            element={
+              <ProtectedRoute>
+                <PageWrapper><Offers /></PageWrapper>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="agent"
+            element={
+              <ProtectedRoute>
+                <PageWrapper><Agent /></PageWrapper>
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<PageWrapper><NotFound /></PageWrapper>} />
         </Route>
       </Routes>

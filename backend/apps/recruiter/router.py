@@ -6,6 +6,7 @@ from apps.auth.models import User, UserRole
 from apps.auth.security import get_current_user
 from apps.candidate.models import Application, CandidateProfile
 from apps.company.models import Company
+from apps.jobs.schemas import JobPublicOut, CompanyPublicOut
 from apps.recruiter.models import Job, Offer, Ranking
 from apps.recruiter.schemas import (
     CandidateRankOut,
@@ -15,6 +16,7 @@ from apps.recruiter.schemas import (
     OfferOut,
     RankingOut,
 )
+from apps.notifications.service import NotificationService
 
 router = APIRouter()
 
@@ -251,6 +253,11 @@ async def create_offer(
     )
     await offer.insert()
 
+    # Notify candidate
+    await NotificationService.notify_offer_created(
+        payload.candidate_id, payload.job_id, job.title, str(offer.id)
+    )
+
     return OfferOut(
         id=str(offer.id),
         job_id=offer.job_id,
@@ -261,4 +268,97 @@ async def create_offer(
         status=offer.status,
         message=offer.message,
         created_at=offer.created_at,
+    )
+
+
+@router.put("/offers/{offer_id}/status", response_model=OfferOut)
+async def update_offer_status(
+    offer_id: str,
+    status: str,
+    current_user: User = Depends(get_current_user),
+):
+    """Update offer status (ACCEPTED / REJECTED). Candidates only."""
+    if current_user.role != UserRole.CANDIDATE:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only candidates can accept or reject offers",
+        )
+
+    if status not in ("ACCEPTED", "REJECTED"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Status must be ACCEPTED or REJECTED",
+        )
+
+    offer = await Offer.get(offer_id)
+    if not offer:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Offer not found")
+
+    if offer.candidate_id != str(current_user.id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not your offer",
+        )
+
+    offer.status = status
+    await offer.save()
+
+    # Fetch job and candidate name for notification
+    job = await Job.get(offer.job_id)
+    job_title = job.title if job else "Unknown Position"
+    candidate_name = current_user.full_name
+
+    if status == "ACCEPTED":
+        await NotificationService.notify_offer_accepted(
+            offer.recruiter_id, candidate_name, job_title
+        )
+    else:
+        await NotificationService.notify_offer_rejected(
+            offer.recruiter_id, candidate_name, job_title
+        )
+
+    # Fetch job for response
+    jobs_map = {}
+    if job:
+        from apps.company.models import Company
+
+        company = await Company.get(job.company_id)
+        if company:
+            company_out = CompanyPublicOut(
+                id=str(company.id),
+                name=company.name,
+                logo_url=company.logo_url,
+                description=company.description,
+                website=company.website,
+            )
+            from apps.jobs.schemas import JobPublicOut
+
+            jobs_map[str(job.id)] = JobPublicOut(
+                id=str(job.id),
+                company_id=job.company_id,
+                title=job.title,
+                description=job.description,
+                requirements=job.requirements,
+                skills=job.skills,
+                location=job.location,
+                salary_min=job.salary_min,
+                salary_max=job.salary_max,
+                role_type=job.role_type,
+                remote_option=job.remote_option,
+                status=job.status,
+                created_at=job.created_at,
+                company=company_out,
+            )
+
+    return OfferOut(
+        id=str(offer.id),
+        job_id=offer.job_id,
+        candidate_id=offer.candidate_id,
+        recruiter_id=offer.recruiter_id,
+        salary_offered=offer.salary_offered,
+        benefits=offer.benefits,
+        status=offer.status,
+        message=offer.message,
+        created_at=offer.created_at,
+        job=jobs_map.get(offer.job_id),
     )

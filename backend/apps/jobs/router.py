@@ -10,6 +10,7 @@ from apps.company.models import Company
 from apps.recruiter.models import Job
 from apps.jobs.schemas import JobPublicOut, CompanyPublicOut
 from apps.recruiter.schemas import JobOut
+from apps.notifications.service import NotificationService
 
 router = APIRouter()
 
@@ -155,5 +156,8 @@ async def apply_to_job(
         status="APPLIED"
     )
     await application.insert()
-    
-    return {"message": "Application submitted successfully", "application_id": str(application.id)}
+
+    # Trigger notifications
+    await NotificationService.notify_applied(str(current_user.id), id, job.title)
+
+    return {"message": "Application submitted successfully", "application_id": str(application.id)}

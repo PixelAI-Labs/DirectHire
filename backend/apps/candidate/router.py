@@ -2,7 +2,6 @@
 Candidate Router — Profile, Resumes, Applications
 """
 import os
-import shutil
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from beanie.operators import In
 
@@ -21,6 +20,7 @@ from apps.candidate.schemas import (
     OfferOut
 )
 from apps.candidate.gemma_ocr_service import extract_resume_with_gemma
+from apps.upload.router import save_upload_file
 
 router = APIRouter()
 
@@ -89,21 +89,17 @@ async def upload_resume(
     current_user: User = Depends(get_current_user)
 ):
     _require_candidate(current_user)
-    
+
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
-        
-    upload_dir = os.path.join(settings.UPLOAD_DIR, "resumes")
-    os.makedirs(upload_dir, exist_ok=True)
-    
-    # Save the file locally
-    file_path = os.path.join(upload_dir, f"{current_user.id}_{file.filename}")
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-        
+
+    # Use shared upload utility
+    prefix = f"{current_user.id}_"
+    file_path, _ = await save_upload_file(file, "resumes", prefix=prefix)
+
     # Extract text using Gemma 27B / PyPDF2
     parsed_text = await extract_resume_with_gemma(file_path)
-    
+
     # Check if a resume already exists for the user
     resume = await Resume.find_one(Resume.user_id == str(current_user.id))
     if resume:
@@ -117,13 +113,13 @@ async def upload_resume(
             parsed_text=parsed_text
         )
         await resume.insert()
-        
+
     # Update candidate profile with resume URL (just a local path for now)
     profile = await CandidateProfile.find_one(CandidateProfile.user_id == str(current_user.id))
     if profile:
-        profile.resume_url = f"/api/uploads/resumes/{current_user.id}_{file.filename}"
+        profile.resume_url = f"/uploads/resumes/{os.path.basename(file_path)}"
         await profile.save()
-        
+
     return ResumeOut(
         id=str(resume.id),
         user_id=resume.user_id,

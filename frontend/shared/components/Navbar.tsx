@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
-import { cn } from '../utils/cn'
 
 interface NavbarProps {
   variant?: 'candidate' | 'recruiter'

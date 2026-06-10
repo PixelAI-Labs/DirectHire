@@ -39,11 +39,19 @@ class Settings(BaseSettings):
 
     # File Storage
     UPLOAD_DIR: str = "uploads"
-    MAX_FILE_SIZE: int = 5242880  # 5MB
+    MAX_UPLOAD_SIZE_MB: int = 5
+    MAX_FILE_SIZE: int = 5242880  # 5MB (backwards compat)
+    ALLOWED_UPLOAD_TYPES: set[str] = {"application/pdf", "image/png", "image/jpeg", "image/jpg"}
+    UPLOAD_TYPE_DIRS: dict[str, str] = {
+        "resume": "resumes",
+        "logo": "logos",
+        "avatar": "avatars",
+    }
 
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+        extra = "ignore"
 
 
 settings = Settings()

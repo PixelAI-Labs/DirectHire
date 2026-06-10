@@ -30,6 +30,10 @@ async def create_company(
     payload: CompanyCreate,
     current_user: User = Depends(get_current_user),
 ):
+    """
+    To set a company logo, first upload the file via POST /api/upload with
+    file_type="logo", then pass the returned URL as payload.logo_url.
+    """
     company = Company(
         name=payload.name,
         logo_url=payload.logo_url,
@@ -80,6 +84,10 @@ async def update_company(
     payload: CompanyUpdate,
     current_user: User = Depends(get_current_user),
 ):
+    """
+    To update the company logo, first upload the file via POST /api/upload with
+    file_type="logo", then pass the returned URL as payload.logo_url.
+    """
     company = await Company.find_one(Company.id == company_id)
     if company is None:
         raise HTTPException(

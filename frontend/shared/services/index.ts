@@ -2,3 +2,8 @@
 export { apiClient, setAuthToken } from './apiClient'
 export { authService } from './authService'
 export { uploadService } from './uploadService'
+export { jobService } from './jobService'
+export { candidateService } from './candidateService'
+export { agentService } from './agentService'
+export { companyService } from './companyService'
+export { recruiterService } from './recruiterService'

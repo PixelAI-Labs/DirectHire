@@ -62,3 +62,4 @@ tmp/
 # Graphify specific ignores (only ignore caches/hidden files, keep final graph)
 graphify-out/.*
 graphify-out/cache/
+backend_exploration_summary.md

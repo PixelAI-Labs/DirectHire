@@ -3,8 +3,9 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from apps.agents.core import get_agent_llm
 
 class CareerAgent:
-    def __init__(self):
-        self.llm = get_agent_llm(temperature=0.2)
+    @property
+    def llm(self):
+        return get_agent_llm(temperature=0.2)
         
     async def review_resume(self, resume_text: str) -> str:
         """Analyzes a resume against industry standards and provides actionable feedback."""

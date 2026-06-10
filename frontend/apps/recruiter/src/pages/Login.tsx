@@ -46,8 +46,9 @@ export const Login: React.FC = () => {
     try {
       const res = await authService.login({ email: formData.email, password: formData.password })
       setAuthToken(res.access_token)
+      localStorage.setItem('user', JSON.stringify(res.user))
       toast.addToast('Welcome back!', 'success')
-      navigate('/')
+      navigate('/dashboard')
     } catch (error: any) {
       setShake(true)
       const msg = error.response?.data?.detail || 'Login failed. Please try again.'

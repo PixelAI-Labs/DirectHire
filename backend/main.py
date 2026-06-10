@@ -3,9 +3,11 @@ DirectHire API
 FastAPI application entry point
 """
 
+import os
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from core.config import settings
 
@@ -38,9 +40,10 @@ from apps.recruiter.router import router as recruiter_router
 from apps.company.router import router as company_router
 from apps.jobs.router import router as jobs_router
 from apps.agents.router import router as agents_router
-# from apps.assessment.router import router as assessment_router
-# from apps.interview.router import router as interview_router
-# from apps.notifications.router import router as notifications_router
+from apps.assessment.router import router as assessment_router
+from apps.interview.router import router as interview_router
+from apps.notifications.router import router as notifications_router
+from apps.upload.router import router as upload_router
 
 # Register routers
 app.include_router(auth_router, prefix="/api/auth", tags=["Auth"])
@@ -49,9 +52,15 @@ app.include_router(recruiter_router, prefix="/api/recruiter", tags=["Recruiter"]
 app.include_router(company_router, prefix="/api/companies", tags=["Companies"])
 app.include_router(jobs_router, prefix="/api/jobs", tags=["Jobs"])
 app.include_router(agents_router, prefix="/api/agents", tags=["Agents"])
-# app.include_router(assessment_router, prefix="/api/assessments", tags=["Assessments"])
-# app.include_router(interview_router, prefix="/api/interviews", tags=["Interviews"])
-# app.include_router(notifications_router, prefix="/api/notifications", tags=["Notifications"])
+app.include_router(assessment_router, prefix="/api/assessments", tags=["Assessments"])
+app.include_router(interview_router, prefix="/api/interviews", tags=["Interviews"])
+app.include_router(notifications_router, prefix="/api/notifications", tags=["Notifications"])
+app.include_router(upload_router, prefix="/api/upload", tags=["Upload"])
+
+# Static file serving for uploads
+upload_dir = os.path.join(os.path.dirname(__file__), settings.UPLOAD_DIR)
+os.makedirs(upload_dir, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=upload_dir), name="uploads")
 
 if __name__ == "__main__":
     uvicorn.run(
