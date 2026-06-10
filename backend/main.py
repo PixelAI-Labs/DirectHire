@@ -37,7 +37,7 @@ from apps.candidate.router import router as candidate_router
 from apps.recruiter.router import router as recruiter_router
 from apps.company.router import router as company_router
 from apps.jobs.router import router as jobs_router
-# from apps.agents.router import router as agents_router
+from apps.agents.router import router as agents_router
 # from apps.assessment.router import router as assessment_router
 # from apps.interview.router import router as interview_router
 # from apps.notifications.router import router as notifications_router
@@ -48,7 +48,7 @@ app.include_router(candidate_router, prefix="/api/candidate", tags=["Candidate"]
 app.include_router(recruiter_router, prefix="/api/recruiter", tags=["Recruiter"])
 app.include_router(company_router, prefix="/api/companies", tags=["Companies"])
 app.include_router(jobs_router, prefix="/api/jobs", tags=["Jobs"])
-# app.include_router(agents_router, prefix="/api/agents", tags=["Agents"])
+app.include_router(agents_router, prefix="/api/agents", tags=["Agents"])
 # app.include_router(assessment_router, prefix="/api/assessments", tags=["Assessments"])
 # app.include_router(interview_router, prefix="/api/interviews", tags=["Interviews"])
 # app.include_router(notifications_router, prefix="/api/notifications", tags=["Notifications"])
