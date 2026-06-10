@@ -50,11 +50,11 @@
 - [x] `[R]` Implement candidate ranking formula (Resume 25%, Assessment 30%, etc.).
 
 ## Phase 5: Job Discovery System (Public)
-- [ ] `[C]` Create public `GET /api/jobs` endpoint (search, filter, pagination).
-- [ ] `[C]` Create public `GET /api/jobs/{id}` endpoint (job details with company info).
-- [ ] `[C]` Build `POST /api/jobs/{id}/apply` endpoint (creates Application).
-- [ ] `[C]` Implement job search filters: location, salary range, skills, role type.
-- [ ] `[C]` Add job embedding for semantic search.
+- [x] `[C]` Create public `GET /api/jobs` endpoint (search, filter, pagination).
+- [x] `[C]` Create public `GET /api/jobs/{id}` endpoint (job details with company info).
+- [x] `[C]` Build `POST /api/jobs/{id}/apply` endpoint (creates Application).
+- [x] `[C]` Implement job search filters: location, salary range, skills, role type.
+- [x] `[C]` Add job embedding for semantic search.
 
 ## Phase 6: Candidate Domain (Backend)
 - [x] `[C]` Create `CandidateProfile` Pydantic model.
