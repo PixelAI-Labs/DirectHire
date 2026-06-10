@@ -60,12 +60,12 @@
 - [x] `[C]` Create `CandidateProfile` Pydantic model.
 - [x] `[C]` Create `Resume` Pydantic model (with `file_path` for local storage).
 - [x] `[C]` Create `Application` Pydantic model.
-- [ ] `[C]` Build `GET /api/candidate/profile` router.
-- [ ] `[C]` Build `PUT /api/candidate/profile` router.
-- [ ] `[C]` Build `POST /api/candidate/resume` (UploadFile + save to `uploads/resumes/` + parse).
-- [ ] `[C]` Integrate resume PDF/OCR extraction logic.
-- [ ] `[C]` Build `GET /api/candidate/applications` router.
-- [ ] `[C]` Build `GET /api/candidate/offers` router.
+- [x] `[C]` Build `GET /api/candidate/profile` router.
+- [x] `[C]` Build `PUT /api/candidate/profile` router.
+- [x] `[C]` Build `POST /api/candidate/resume` (UploadFile + save to `uploads/resumes/` + parse).
+- [x] `[C]` Integrate resume PDF/OCR extraction logic.
+- [x] `[C]` Build `GET /api/candidate/applications` router.
+- [x] `[C]` Build `GET /api/candidate/offers` router.
 
 ## Phase 7: Agent Orchestration (Explicit Capabilities)
 - [ ] `[S]` Setup `apps/agents/` with OpenAI / Anthropic LangChain client.
