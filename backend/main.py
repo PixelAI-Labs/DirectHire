@@ -33,7 +33,7 @@ async def health_check():
 
 # Router imports (will be uncommented as modules are built)
 from apps.auth.router import router as auth_router
-# from apps.candidate.router import router as candidate_router
+from apps.candidate.router import router as candidate_router
 from apps.recruiter.router import router as recruiter_router
 from apps.company.router import router as company_router
 from apps.jobs.router import router as jobs_router
@@ -44,7 +44,7 @@ from apps.jobs.router import router as jobs_router
 
 # Register routers
 app.include_router(auth_router, prefix="/api/auth", tags=["Auth"])
-# app.include_router(candidate_router, prefix="/api/candidate", tags=["Candidate"])
+app.include_router(candidate_router, prefix="/api/candidate", tags=["Candidate"])
 app.include_router(recruiter_router, prefix="/api/recruiter", tags=["Recruiter"])
 app.include_router(company_router, prefix="/api/companies", tags=["Companies"])
 app.include_router(jobs_router, prefix="/api/jobs", tags=["Jobs"])
