@@ -68,25 +68,25 @@
 - [x] `[C]` Build `GET /api/candidate/offers` router.
 
 ## Phase 7: Agent Orchestration (Explicit Capabilities)
-- [ ] `[S]` Setup `apps/agents/` with OpenAI / Anthropic LangChain client.
+- [x] `[S]` Setup `apps/agents/` with OpenAI / Anthropic LangChain client.
 - [x] `[S]` Create `AgentEvent` Pydantic model and `agent_events` collection.
-- [ ] `[C]` Define **Career Agent** capabilities:
-  - [ ] `[C]` Resume Review: analyze resume against industry standards.
-  - [ ] `[C]` Skill Gap Analysis: compare skills vs. job requirements.
-  - [ ] `[C]` Job Matching: score candidate-job fit (0-100).
-  - [ ] `[C]` Application Suggestions: tailor resume/cover letter per job.
-  - [ ] `[C]` Interview Preparation: generate likely questions and tips.
+- [x] `[C]` Define **Career Agent** capabilities:
+  - [x] `[C]` Resume Review: analyze resume against industry standards.
+  - [x] `[C]` Skill Gap Analysis: compare skills vs. job requirements.
+  - [x] `[C]` Job Matching: score candidate-job fit (0-100).
+  - [x] `[C]` Application Suggestions: tailor resume/cover letter per job.
+  - [x] `[C]` Interview Preparation: generate likely questions and tips.
 - [ ] `[R]` Define **Hiring Agent** capabilities:
   - [ ] `[R]` Resume Screening: parse and score resumes vs. job description.
   - [ ] `[R]` Candidate Ranking: sort applicants by match score.
   - [ ] `[R]` Assessment Analysis: evaluate test results, flag anomalies.
   - [ ] `[R]` Offer Drafting: generate offer letters with salary recommendations.
-- [ ] `[S]` Build **Agent Orchestrator** (The Bus):
-  - [ ] `[S]` `POST /api/agents/match` — triggers Career → Hiring Agent evaluation.
-  - [ ] `[S]` `POST /api/agents/schedule` — parses natural language to schedule interviews.
-  - [ ] `[S]` `POST /api/agents/negotiate` — salary/term negotiation support.
-  - [ ] `[S]` `POST /api/agents/analyze` — runs full pipeline on a candidate.
-- [ ] `[S]` Implement async scoring via FastAPI `BackgroundTasks`.
+- [x] `[S]` Build **Agent Orchestrator** (The Bus):
+  - [x] `[S]` `POST /api/agents/match` — triggers Career → Hiring Agent evaluation.
+  - [x] `[S]` `POST /api/agents/schedule` — parses natural language to schedule interviews.
+  - [x] `[S]` `POST /api/agents/negotiate` — salary/term negotiation support.
+  - [x] `[S]` `POST /api/agents/analyze` — runs full pipeline on a candidate.
+- [x] `[S]` Implement async scoring via FastAPI `BackgroundTasks`.
 
 ## Phase 8: Assessment & Interview Integration
 - [ ] `[S]` Build `apps/assessment/` engine for dynamic test generation.
