@@ -28,7 +28,7 @@ async def extract_resume_with_gemma(file_path: str) -> str:
         llm = ChatOpenAI(
             api_key=settings.GEMMA_API_KEY,
             base_url=settings.GEMMA_API_BASE_URL,
-            model=settings.GEMMA_DENSE_MODEL,
+            model=settings.GEMMA_E4B_MODEL,
             temperature=0.0
         )
         
