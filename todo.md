@@ -98,7 +98,11 @@
 - [x] `[S]` Build `apps/interview/` module (scheduling, scoring, notes).
 - [x] `[S]` Create `assessments` MongoDB collection.
 - [x] `[S]` Create `interviews` MongoDB collection.
-- [ ] `[S]` Build `apps/interview/` EchoHire integration (requires EchoHire API key / webhook).
+- [ ] `[S]` Integrate Hugging Face Whisper Large v3 (STT) for interview audio transcription.
+- [ ] `[S]` Implement Gemini 3.5 Flash interactive interview agent (Brain) & TTS responses.
+- [ ] `[C]` Build candidate Mock Interview Page with voice recording and premium dark-theme waveform.
+- [ ] `[R]` Integrate mock interview evaluations, scoring summaries, and transcripts inside recruiter panel.
+
 
 ## Phase 9: Notification System
 - [x] `[S]` Create `Notification` Pydantic model (user_id, type, title, message, read, created_at).

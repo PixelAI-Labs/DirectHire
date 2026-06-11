@@ -30,6 +30,16 @@ class Settings(BaseSettings):
     GEMMA_MOE_MODEL: str = "gemma-4-31b-it"
     GEMMA_DENSE_MODEL: str = "gemma-4-31b-it"
 
+    # Gemini APIs (Main Brain)
+    GEMINI_API_KEY: str = ""
+    GEMINI_API_BASE_URL: str = "https://generativelanguage.googleapis.com/v1beta/openai"
+    GEMINI_MODEL: str = "gemini-1.5-flash"
+
+    # Hugging Face API (STT / Whisper Large v3)
+    HUGGINGFACE_API_KEY: str = ""
+    HUGGINGFACE_STT_URL: str = "https://api-inference.huggingface.co/models/openai/whisper-large-v3"
+
+
     # Email
     SMTP_HOST: str = ""
     SMTP_PORT: int = 587

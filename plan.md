@@ -154,12 +154,15 @@ directhire/
 - [ ] Implement async scoring via FastAPI `BackgroundTasks`.
 
 ### Phase 8: Assessment & Interview Integration
-**Goal**: Dynamic assessments and EchoHire interview integration are wired into the pipeline.
+**Goal**: Dynamic assessments and local voice-based AI Mock Interview Engine (Hugging Face Whisper Large v3 STT + Gemini Brain & TTS) are wired into the pipeline.
 
 **Shared**
 - [ ] Build `apps/assessment/` engine for dynamic test generation.
-- [ ] Build `apps/interview/` integration with EchoHire.
-- [ ] Store assessment and interview results in MongoDB.
+- [ ] Build `apps/interview/` AI Mock Interview engine:
+  - Integrate Hugging Face Whisper Large v3 for processing recorded audio.
+  - Implement Gemini 3.5 Flash chat completion agent as the interviewer brain.
+- [ ] Store assessment and mock interview transcripts / results in MongoDB.
+
 
 ---
 

@@ -96,9 +96,8 @@ export const Applications: React.FC = () => {
                   )}
                 </div>
                 <span
-                  className={`rounded-full bg-[#2a3150] px-3 py-1 text-sm font-medium ${
-                    STATUS_COLORS[app.status] ?? 'text-[#8b92b4]'
-                  }`}
+                  className={`rounded-full bg-[#2a3150] px-3 py-1 text-sm font-medium ${STATUS_COLORS[app.status] ?? 'text-[#8b92b4]'
+                    }`}
                 >
                   {app.status.charAt(0) + app.status.slice(1).toLowerCase()}
                 </span>
