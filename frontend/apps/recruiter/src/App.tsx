@@ -12,6 +12,7 @@ import { Jobs } from './pages/Jobs'
 import { CreateJob } from './pages/CreateJob'
 import { JobDetail } from './pages/JobDetail'
 import { CandidateView } from './pages/CandidateView'
+import { InterviewDetail } from './pages/InterviewDetail'
 import { ProtectedRoute, PublicRoute } from '@directhire/shared'
 
 const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -118,6 +119,14 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute allowedRoles={['RECRUITER', 'ADMIN']}>
                 <PageWrapper><CandidateView /></PageWrapper>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="interviews/:id"
+            element={
+              <ProtectedRoute allowedRoles={['RECRUITER', 'ADMIN']}>
+                <PageWrapper><InterviewDetail /></PageWrapper>
               </ProtectedRoute>
             }
           />

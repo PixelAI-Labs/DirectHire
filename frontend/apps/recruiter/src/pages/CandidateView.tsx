@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Card, Button, Badge, Skeleton, useToast } from '@directhire/shared'
-import { candidateService, recruiterService } from '@directhire/shared/services'
-import { ArrowLeft, Mail, User } from 'lucide-react'
+import { candidateService, recruiterService, interviewService } from '@directhire/shared/services'
+import { ArrowLeft, Mail, User, FileText } from 'lucide-react'
 
 export const CandidateView: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -11,6 +11,7 @@ export const CandidateView: React.FC = () => {
 
   const [profile, setProfile] = useState<any>(null)
   const [applications, setApplications] = useState<any[]>([])
+  const [interviews, setInterviews] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -47,6 +48,17 @@ export const CandidateView: React.FC = () => {
         overall_score: r.overall_score,
       }))
       setApplications(apps)
+
+      // Fetch interviews for this candidate
+      try {
+        const interviewsRes = await interviewService.list()
+        const candidateInterviews = (interviewsRes.data || []).filter(
+          (i: any) => i.candidate_id === candidateId
+        )
+        setInterviews(candidateInterviews)
+      } catch {
+        setInterviews([])
+      }
     } catch (error: any) {
       console.error('Failed to load candidate:', error)
       // Try to get basic profile from candidate service
@@ -146,6 +158,29 @@ export const CandidateView: React.FC = () => {
           </Card>
         ))}
       </div>
+
+      {/* Interview History */}
+      <Card className="mt-2">
+        <div className="flex items-center gap-2 mb-3">
+          <FileText size={18} className="text-primary" />
+          <h2 className="text-lg font-semibold text-text">Interview History</h2>
+        </div>
+        <p className="text-sm text-text-muted mb-3">
+          View mock interview evaluations with transcripts, scoring, and behavioral analysis.
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={interviews.length === 0}
+          onClick={() => {
+            if (interviews.length > 0) {
+              navigate(`/interviews/${interviews[0].id}`)
+            }
+          }}
+        >
+          View Interview Evaluation
+        </Button>
+      </Card>
 
       {/* Applications */}
       <Card>

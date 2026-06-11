@@ -11,6 +11,7 @@ import { JobDetail } from './pages/JobDetail'
 import { Applications } from './pages/Applications'
 import { Offers } from './pages/Offers'
 import { Agent } from './pages/Agent'
+import { MockInterview } from './pages/MockInterview'
 import { NotFound } from './pages/NotFound'
 import { ProtectedRoute, PublicRoute } from '@directhire/shared'
 
@@ -102,6 +103,22 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <PageWrapper><Agent /></PageWrapper>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="interview/:interviewId"
+            element={
+              <ProtectedRoute>
+                <PageWrapper><MockInterview /></PageWrapper>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="mock-interview"
+            element={
+              <ProtectedRoute>
+                <PageWrapper><MockInterview /></PageWrapper>
               </ProtectedRoute>
             }
           />

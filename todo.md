@@ -98,10 +98,10 @@
 - [x] `[S]` Build `apps/interview/` module (scheduling, scoring, notes).
 - [x] `[S]` Create `assessments` MongoDB collection.
 - [x] `[S]` Create `interviews` MongoDB collection.
-- [ ] `[S]` Integrate Hugging Face Whisper Large v3 (STT) for interview audio transcription.
-- [ ] `[S]` Implement Gemini 3.5 Flash interactive interview agent (Brain) & TTS responses.
-- [ ] `[C]` Build candidate Mock Interview Page with voice recording and premium dark-theme waveform.
-- [ ] `[R]` Integrate mock interview evaluations, scoring summaries, and transcripts inside recruiter panel.
+- [x] `[S]` Integrate Hugging Face Whisper Large v3 (STT) for interview audio transcription.
+- [x] `[S]` Implement Gemini 3.5 Flash interactive interview agent (Brain) & TTS responses.
+- [x] `[C]` Build candidate Mock Interview Page with voice recording and premium dark-theme waveform.
+- [x] `[R]` Integrate mock interview evaluations, scoring summaries, and transcripts inside recruiter panel.
 
 
 ## Phase 9: Notification System

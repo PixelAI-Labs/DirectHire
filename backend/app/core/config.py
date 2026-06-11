@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     # External APIs
     OPENAI_API_KEY: Optional[str] = None
     ANTHROPIC_API_KEY: Optional[str] = None
+    GEMINI_API_KEY: Optional[str] = None
+    HUGGINGFACE_API_TOKEN: Optional[str] = None
     
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

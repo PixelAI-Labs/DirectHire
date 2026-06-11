@@ -18,6 +18,7 @@
     "baseUrl": ".",
     "paths": {
       "@directhire/shared": ["../../shared"],
+      "@directhire/shared/*": ["../../shared/*"],
       "@/*": ["src/*"]
     }
   },

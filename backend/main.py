@@ -4,14 +4,25 @@ FastAPI application entry point
 """
 
 import os
+from contextlib import asynccontextmanager
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from core.config import settings
+from core.database import Database
 
-app = FastAPI(
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await Database.connect()
+    yield
+    await Database.disconnect()
+
+
+app = FastAPI(lifespan=lifespan,
     title="DirectHire API",
     description="Autonomous multi-agent recruitment ecosystem",
     version="1.0.0",

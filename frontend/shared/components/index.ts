@@ -1,4 +1,5 @@
 // Shared UI Components
+export { ScoreRing } from './ScoreRing'
 export { Button } from './Button'
 export { Card } from './Card'
 export { Modal } from './Modal'

@@ -23,6 +23,12 @@ class InterviewOut(BaseModel):
     technical_score: float
     confidence_score: float
     behavioral_analysis: str
+    transcript: str
+    qa_history: list[dict]
+    evaluation_summary: str
+    overall_score: float
+    strengths: list[str]
+    weaknesses: list[str]
     created_at: datetime
 
 
@@ -35,3 +41,6 @@ class InterviewUpdate(BaseModel):
     technical_score: float | None = None
     confidence_score: float | None = None
     behavioral_analysis: str | None = None
+    transcript: str | None = None
+    qa_history: list[dict] | None = None
+    evaluation_summary: str | None = None
