@@ -1,8 +1,10 @@
 // Shared UI Components
 export { ScoreRing } from './ScoreRing'
 export { Button } from './Button'
+export { PageHeader } from './PageHeader'
 export { Card } from './Card'
 export { Modal } from './Modal'
+export { NotificationPanel } from './NotificationPanel'
 export { DataTable } from './DataTable'
 export { MarkdownRenderer } from './MarkdownRenderer'
 export { Input } from './Input'

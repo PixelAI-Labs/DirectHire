@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Outlet, useNavigate, Link } from 'react-router-dom'
-import { ToastProvider, useToast } from '@directhire/shared'
+import { ToastProvider, useToast, NotificationPanel } from '@directhire/shared'
 import { motion } from 'framer-motion'
 import { Menu, X, LogOut, User, Briefcase, FileText, Gift, Bot } from 'lucide-react'
 
@@ -9,6 +9,8 @@ export const Layout: React.FC = () => {
   const toast = useToast()
   const navigate = useNavigate()
   const token = localStorage.getItem('token')
+  const userStr = localStorage.getItem('user')
+  const user = userStr ? JSON.parse(userStr) : null
 
   const handleLogout = () => {
     localStorage.removeItem('token')
@@ -54,6 +56,10 @@ export const Layout: React.FC = () => {
                     <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r from-[#adc6ff] to-[#d0bcff] transition-all duration-200 group-hover:w-full" />
                   </Link>
                 ))}
+                
+                {/* Notifications */}
+                {user && <NotificationPanel userId={user.id} />}
+
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-1.5 text-sm font-medium text-[#8b92b4] transition-colors hover:text-red-400"
