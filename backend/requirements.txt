@@ -19,3 +19,4 @@ redis>=5.0.1
 PyPDF2>=3.0.1
 langchain-openai>=0.0.5
 aiosmtplib>=3.0.0
+python-socketio>=5.11.0

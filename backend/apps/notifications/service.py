@@ -9,6 +9,7 @@ from apps.notifications.models import Notification
 from apps.recruiter.models import Job
 from apps.candidate.models import Application
 from core.config import settings
+from core.socket import sio, connected_users
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +61,28 @@ class NotificationService:
             related_id=related_id,
         )
         await notification.insert()
+        
+        # Emit WebSocket event
+        sids = connected_users.get(user_id, set())
+        if sids:
+            for sid in sids:
+                try:
+                    await sio.emit(
+                        "new_notification",
+                        {
+                            "id": str(notification.id),
+                            "type": notification.type,
+                            "title": notification.title,
+                            "message": notification.message,
+                            "created_at": notification.created_at.isoformat(),
+                            "read": notification.read,
+                            "related_id": notification.related_id
+                        },
+                        to=sid
+                    )
+                except Exception as e:
+                    logger.warning(f"[Socket] Failed to emit notification to {sid}: {e}")
+
         return notification
 
     @staticmethod

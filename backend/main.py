@@ -8,8 +8,10 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+import socketio
 
 from core.config import settings
+from core.socket import sio
 
 app = FastAPI(
     title="DirectHire API",
@@ -62,9 +64,12 @@ upload_dir = os.path.join(os.path.dirname(__file__), settings.UPLOAD_DIR)
 os.makedirs(upload_dir, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=upload_dir), name="uploads")
 
+# Wrap the FastAPI app with the Socket.IO ASGI app
+sio_app = socketio.ASGIApp(sio, other_asgi_app=app)
+
 if __name__ == "__main__":
     uvicorn.run(
-        "main:app",
+        "main:sio_app",
         host=settings.HOST,
         port=settings.PORT,
         reload=settings.DEBUG,
