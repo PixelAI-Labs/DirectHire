@@ -1,7 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 
-const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 // FastAPI typically runs on 8000, we remove /api if present for socket connection
+const apiBase = (import.meta as any).env?.VITE_API_BASE || 'http://localhost:8000';
 const socketUrl = apiBase.replace(/\/api\/?$/, '').replace(/\/$/, '');
 
 let notificationSocket: Socket | null = null;
