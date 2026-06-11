@@ -155,7 +155,7 @@
 - [x] `[R]` Build **Create Job** form (linked to company).
 - [x] `[R]` Build **Job Details** page: AI-ranked applicant table, send offers.
 - [x] `[R]` Build **Candidate View**: profile + match scores.
-- [ ] `[R]` Build **Notifications Panel**: view all job/candidate related alerts.
+- [x] `[R]` Build **Notifications Panel**: view all job/candidate related alerts.
 - [x] `[R]` Wire all pages to backend APIs.
 - [x] `[R]` Add route protection (`ProtectedRoute` with role checks) + auth-aware layout.
 
@@ -164,13 +164,15 @@
 - [x] `[R]` Wire Recruiter app to backend APIs (companies, jobs, candidates).
 - [x] `[S]` End-to-end Agent Communication Layer implemented (CareerAgent ↔ HiringAgent via Orchestrator).
 - [x] `[S]` Notification triggers wired for application + offer events.
+  - [x] `[S]` Interview scheduled → both parties notified.
+  - [x] `[S]` Assessment assigned → candidate notified.
 - [x] `[S]` Verify local file uploads and static file serving.
-- [ ] `[S]` Write pytest cases for Auth endpoints.
-- [ ] `[S]` Write pytest cases for Candidate endpoints.
-- [ ] `[S]` Write pytest cases for Recruiter endpoints.
-- [ ] `[S]` Write pytest cases for Agent endpoints.
-- [ ] `[S]` Write pytest cases for Notification endpoints.
-- [ ] `[S]` Setup `Dockerfile` for FastAPI.
+- [x] `[S]` Write pytest cases for Auth endpoints.
+- [x] `[S]` Write pytest cases for Candidate endpoints.
+- [x] `[S]` Write pytest cases for Recruiter endpoints.
+- [x] `[S]` Write pytest cases for Agent endpoints.
+- [x] `[S]` Write pytest cases for Notification endpoints.
+- [x] `[S]` Setup `Dockerfile` for FastAPI.
 - [ ] `[S]` Deploy backend to Railway.
 - [ ] `[S]` Deploy Candidate app to Vercel.
 - [ ] `[S]` Deploy Recruiter app to Vercel.

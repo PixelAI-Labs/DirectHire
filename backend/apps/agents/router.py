@@ -83,7 +83,7 @@ async def _run_match_task(candidate_id: str, job_id: str):
     try:
         # Fetch data
         resume_text = await _get_candidate_resume_text(candidate_id)
-        job = await RecruiterJob.find_one(RecruiterJob.id == job_id)
+        job = await RecruiterJob.get(job_id)
         if not job:
             return
 
@@ -280,7 +280,7 @@ async def _run_negotiate_task(offer_id: str, prompt: str):
     if not offer:
         return
 
-    job = await RecruiterJob.find_one(RecruiterJob.id == offer.job_id)
+    job = await RecruiterJob.get(offer.job_id)
 
     system_prompt = (
         "You are an expert salary negotiation coach. Based on the offer details and the "
@@ -330,7 +330,7 @@ async def _run_negotiate_task(offer_id: str, prompt: str):
 async def screen_candidate(payload: ScreenRequest):
     """Direct call to HiringAgent.screen_resume."""
     resume_text = await _get_candidate_resume_text(payload.candidate_id)
-    job = await RecruiterJob.find_one(RecruiterJob.id == payload.job_id)
+    job = await RecruiterJob.get(payload.job_id)
     if not job:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
 
@@ -364,7 +364,7 @@ async def rank_candidates(payload: RankRequest):
     Call HiringAgent.rank_candidates for all applicants of a given job.
     Returns ranked list sorted by overall_score descending.
     """
-    job = await RecruiterJob.find_one(RecruiterJob.id == payload.job_id)
+    job = await RecruiterJob.get(payload.job_id)
     if not job:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
 
@@ -443,7 +443,7 @@ async def analyze_assessment_endpoint(
     """
     Call HiringAgent.analyze_assessment to evaluate test results.
     """
-    job = await RecruiterJob.find_one(RecruiterJob.id == job_id)
+    job = await RecruiterJob.get(job_id)
     if not job:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
 
@@ -490,13 +490,13 @@ async def draft_offer_endpoint(payload: DraftOfferRequest):
     Call HiringAgent.draft_offer to generate offer letter + salary recommendation.
     """
     profile = await CandidateProfile.find_one(CandidateProfile.user_id == payload.candidate_id)
-    candidate_user = await User.find_one(User.id == payload.candidate_id)
-    job = await RecruiterJob.find_one(RecruiterJob.id == payload.job_id)
+    candidate_user = await User.get(payload.candidate_id)
+    job = await RecruiterJob.get(payload.job_id)
 
     if not job:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
 
-    company = await Company.find_one(Company.id == job.company_id) if job.company_id else None
+    company = await Company.get(job.company_id) if job.company_id else None
 
     candidate_dict = {
         "full_name": candidate_user.full_name if candidate_user else "",

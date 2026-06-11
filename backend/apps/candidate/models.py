@@ -1,3 +1,4 @@
+from datetime import timezone
 """
 Candidate Models
 """
@@ -12,7 +13,7 @@ class CandidateProfile(Document):
     experience: list[dict] = []
     education: list[dict] = []
     preferences: dict = {}
-    created_at: datetime = datetime.utcnow()
+    created_at: datetime = datetime.now(timezone.utc)
 
     class Settings:
         name = "candidate_profiles"
@@ -21,7 +22,7 @@ class Resume(Document):
     user_id: str
     file_path: str
     parsed_text: str | None = None
-    created_at: datetime = datetime.utcnow()
+    created_at: datetime = datetime.now(timezone.utc)
 
     class Settings:
         name = "resumes"
@@ -31,7 +32,7 @@ class Application(Document):
     candidate_id: str
     status: str = "APPLIED"
     match_score: float | None = None
-    created_at: datetime = datetime.utcnow()
+    created_at: datetime = datetime.now(timezone.utc)
 
     class Settings:
         name = "applications"

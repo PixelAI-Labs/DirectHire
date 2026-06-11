@@ -1,3 +1,4 @@
+from datetime import timezone
 """Assessment Router"""
 import json
 import re
@@ -14,6 +15,7 @@ from apps.assessment.schemas import (
     AssessmentSubmit,
     AssessmentEvaluate,
 )
+from apps.notifications.service import NotificationService
 
 router = APIRouter()
 
@@ -107,6 +109,12 @@ async def create_assessment(
         status="ASSIGNED",
     )
     await assessment.insert()
+    
+    await NotificationService.notify_assessment_assigned(
+        candidate_id=assessment.candidate_id,
+        job_title=job.title
+    )
+    
     return _assessment_to_out(assessment)
 
 
@@ -167,7 +175,7 @@ async def submit_assessment(
     from datetime import datetime
     assessment.candidate_answers = payload.answers
     assessment.status = "SUBMITTED"
-    assessment.submitted_at = datetime.utcnow()
+    assessment.submitted_at = datetime.now(timezone.utc)
     await assessment.save()
     return _assessment_to_out(assessment)
 

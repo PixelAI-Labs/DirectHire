@@ -14,6 +14,7 @@ from apps.interview.schemas import (
 from apps.interview.stt_service import STTService
 from apps.interview.ai_service import InterviewAIService
 from apps.interview.evaluation_service import InterviewEvaluationService
+from apps.notifications.service import NotificationService
 
 router = APIRouter()
 
@@ -67,6 +68,13 @@ async def create_interview(
         status="SCHEDULED",
     )
     await interview.insert()
+    
+    await NotificationService.notify_interview_scheduled(
+        candidate_id=interview.candidate_id,
+        recruiter_id=interview.recruiter_id,
+        job_title=job.title
+    )
+    
     return _interview_to_out(interview)
 
 

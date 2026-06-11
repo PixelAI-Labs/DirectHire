@@ -1,3 +1,4 @@
+from datetime import timezone
 """Interview Models"""
 from beanie import Document
 from datetime import datetime
@@ -22,7 +23,7 @@ class Interview(Document):
     overall_score: float = 0.0
     strengths: list[str] = Field(default_factory=list)
     weaknesses: list[str] = Field(default_factory=list)
-    created_at: datetime = datetime.utcnow()
+    created_at: datetime = datetime.now(timezone.utc)
 
     class Settings:
         name = "interviews"

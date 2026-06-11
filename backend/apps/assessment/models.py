@@ -1,3 +1,4 @@
+from datetime import timezone
 """Assessment Models"""
 from beanie import Document
 from datetime import datetime
@@ -15,7 +16,7 @@ class Assessment(Document):
     coding_score: float = 0.0
     reasoning_score: float = 0.0
     ai_feedback: str = ""
-    created_at: datetime = datetime.utcnow()
+    created_at: datetime = datetime.now(timezone.utc)
     submitted_at: datetime | None = None
 
     class Settings:

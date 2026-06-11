@@ -1,7 +1,7 @@
 """
 Gemma 27B OCR and Resume Extraction Service
 """
-import PyPDF2
+import pypdf
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from core.config import settings
@@ -11,7 +11,7 @@ async def extract_resume_with_gemma(file_path: str) -> str:
     raw_text = ""
     try:
         with open(file_path, "rb") as f:
-            reader = PyPDF2.PdfReader(f)
+            reader = pypdf.PdfReader(f)
             for page in reader.pages:
                 raw_text += page.extract_text() + "\n"
     except Exception as e:
@@ -20,7 +20,7 @@ async def extract_resume_with_gemma(file_path: str) -> str:
 
     # 2. Skip Gemma extraction if API key is not set
     if not settings.GEMMA_API_KEY or settings.GEMMA_API_KEY == "your_gemma_api_key_here":
-        print("GEMMA_API_KEY not configured. Returning raw PyPDF2 text.")
+        print("GEMMA_API_KEY not configured. Returning raw pypdf text.")
         return raw_text
 
     # 3. Call Gemma 27B to clean up and structure the OCR text

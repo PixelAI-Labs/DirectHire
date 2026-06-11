@@ -1,3 +1,4 @@
+from datetime import timezone
 """Recruiter Models"""
 from beanie import Document
 from datetime import datetime
@@ -16,7 +17,7 @@ class Job(Document):
     remote_option: str = "HYBRID"
     status: str = "OPEN"
     embedding: list[float] | None = None
-    created_at: datetime = datetime.utcnow()
+    created_at: datetime = datetime.now(timezone.utc)
 
     class Settings:
         name = "jobs"
@@ -34,7 +35,7 @@ class Ranking(Document):
     match_score: float = 0.0
     overall_score: float = 0.0
     ranking_formula: dict = {}
-    created_at: datetime = datetime.utcnow()
+    created_at: datetime = datetime.now(timezone.utc)
 
     class Settings:
         name = "rankings"
@@ -48,7 +49,7 @@ class Offer(Document):
     benefits: str = ""
     status: str = "PENDING"
     message: str = ""
-    created_at: datetime = datetime.utcnow()
+    created_at: datetime = datetime.now(timezone.utc)
 
     class Settings:
         name = "offers"

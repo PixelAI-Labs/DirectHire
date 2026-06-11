@@ -56,7 +56,7 @@ async def create_job(
             detail="Recruiter must be associated with a company",
         )
 
-    company = await Company.find_one(Company.id == current_user.company_id)
+    company = await Company.get(current_user.company_id)
     if company is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

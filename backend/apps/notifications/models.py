@@ -1,3 +1,4 @@
+from datetime import timezone
 """
 Notification Models
 """
@@ -13,7 +14,7 @@ class Notification(Document):
     message: str
     read: bool = False
     related_id: str | None = None  # ID of the related entity (job_id, application_id, offer_id)
-    created_at: datetime = datetime.utcnow()
+    created_at: datetime = datetime.now(timezone.utc)
 
     class Settings:
         name = "notifications"

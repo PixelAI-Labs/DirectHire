@@ -156,3 +156,29 @@ class NotificationService:
             title="Offer Declined",
             message=f"{candidate_name} declined your offer for '{job_title}'.",
         )
+
+    @staticmethod
+    async def notify_interview_scheduled(candidate_id: str, recruiter_id: str, job_title: str) -> None:
+        """Interview scheduled → both parties notified."""
+        await NotificationService.create(
+            user_id=candidate_id,
+            type="INTERVIEW",
+            title="Interview Scheduled",
+            message=f"An interview for '{job_title}' has been scheduled.",
+        )
+        await NotificationService.create(
+            user_id=recruiter_id,
+            type="INTERVIEW",
+            title="Interview Scheduled",
+            message=f"An interview for '{job_title}' has been scheduled with the candidate.",
+        )
+
+    @staticmethod
+    async def notify_assessment_assigned(candidate_id: str, job_title: str) -> None:
+        """Assessment assigned → candidate notified."""
+        await NotificationService.create(
+            user_id=candidate_id,
+            type="ASSESSMENT",
+            title="Assessment Assigned",
+            message=f"You have been assigned a new assessment for '{job_title}'.",
+        )
