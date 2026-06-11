@@ -119,9 +119,9 @@
   - [x] `[S]` Offer generated → candidate notified.
   - [x] `[S]` Offer accepted/rejected → recruiter notified.
 - [x] `[S]` Setup SMTP email delivery for all notifications (gracefully skips if SMTP not configured).
-- [ ] `[S]` *(Future)*: Add WebSocket real-time delivery and Push notifications.
-- [ ] `[R]` Build **Notifications Panel** in recruiter frontend.
-- [ ] `[C]` Build **Notifications Panel** in candidate frontend.
+- [x] `[S]` *(Future)*: Add WebSocket real-time delivery and Push notifications.
+- [x] `[R]` Build **Notifications Panel** in recruiter frontend.
+- [x] `[C]` Build **Notifications Panel** in candidate frontend.
 
 ## Phase 10: File Storage Strategy (Local)
 - [x] `[S]` Build `POST /api/upload` endpoint (multipart upload, save to local path).
