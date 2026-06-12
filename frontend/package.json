@@ -1,8 +1,27 @@
 {
-  "name": "directhire-frontend",
+  "name": "directhire",
   "private": true,
+  "version": "1.0.0",
+  "description": "DirectHire — Autonomous multi-agent recruitment ecosystem",
   "workspaces": [
     "apps/*",
     "shared"
-  ]
+  ],
+  "scripts": {
+    "candidate": "npm run dev --workspace=apps/candidate",
+    "recruiter": "npm run dev --workspace=apps/recruiter",
+    "build:candidate": "npm run build --workspace=apps/candidate",
+    "build:recruiter": "npm run build --workspace=apps/recruiter",
+    "dev:backend": "cd ../backend && uvicorn main:app --reload --host 0.0.0.0 --port 8000",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "^3.2.0",
+    "eslint": "^8.56.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
 }
