@@ -19,7 +19,7 @@ router = APIRouter()
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 async def register(payload: RegisterPayload):
-    existing = await User.find_one(User.email == payload.email.lower())
+    existing = await User.find_one({"email": payload.email.lower()})
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -40,7 +40,7 @@ async def register(payload: RegisterPayload):
 
 @router.post("/login", response_model=TokenResponse)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = await User.find_one(User.email == form_data.username.lower())
+    user = await User.find_one({"email": form_data.username.lower()})
     if user is None or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -43,6 +43,8 @@ async def create_company(
         created_by=str(current_user.id),
     )
     await company.insert()
+    current_user.company_id = str(company.id)
+    await current_user.save()
     return _company_to_out(company)
 
 
@@ -64,7 +66,12 @@ async def get_company(
     company_id: str,
     current_user: User = Depends(get_current_user),
 ):
-    company = await Company.find_one(Company.id == company_id)
+    from beanie import PydanticObjectId
+    try:
+        oid = PydanticObjectId(company_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid company ID format")
+    company = await Company.get(oid)
     if company is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -88,7 +95,12 @@ async def update_company(
     To update the company logo, first upload the file via POST /api/upload with
     file_type="logo", then pass the returned URL as payload.logo_url.
     """
-    company = await Company.find_one(Company.id == company_id)
+    from beanie import PydanticObjectId
+    try:
+        oid = PydanticObjectId(company_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid company ID format")
+    company = await Company.get(oid)
     if company is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -134,7 +134,12 @@ async def get_job_candidates(
 ):
     _require_recruiter(current_user)
 
-    job = await Job.find_one(Job.id == job_id)
+    from beanie import PydanticObjectId
+    try:
+        oid = PydanticObjectId(job_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid job ID")
+    job = await Job.get(oid)
     if job is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -163,7 +168,12 @@ async def get_job_candidates(
         candidate_profile = await CandidateProfile.find_one(
             CandidateProfile.user_id == app.candidate_id
         )
-        candidate_user = await User.find_one(User.id == app.candidate_id)
+        from beanie import PydanticObjectId
+        try:
+            uid = PydanticObjectId(app.candidate_id)
+            candidate_user = await User.get(uid)
+        except Exception:
+            candidate_user = None
 
         if candidate_user is None:
             continue
@@ -198,7 +208,12 @@ async def get_rankings(current_user: User = Depends(get_current_user)):
             return []
 
         job_ids = [str(j.id) for j in jobs]
-        rankings = await Ranking.find(In(Ranking.job_id, job_ids)).to_list()
+        from beanie import PydanticObjectId
+        try:
+            jids = [PydanticObjectId(jid) for jid in job_ids]
+        except Exception:
+            jids = []
+        rankings = await Ranking.find({"job_id": {"$in": job_ids}}).to_list()
 
     return [
         RankingOut(
@@ -222,7 +237,12 @@ async def create_offer(
 ):
     _require_recruiter(current_user)
 
-    job = await Job.find_one(Job.id == payload.job_id)
+    from beanie import PydanticObjectId
+    try:
+        oid = PydanticObjectId(payload.job_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid job ID")
+    job = await Job.get(oid)
     if job is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -235,7 +255,12 @@ async def create_offer(
             detail="Not authorized to create offers for this job",
         )
 
-    candidate = await User.find_one(User.id == payload.candidate_id, User.role == UserRole.CANDIDATE)
+    from beanie import PydanticObjectId
+    try:
+        uid = PydanticObjectId(payload.candidate_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid candidate ID")
+    candidate = await User.find_one({"_id": uid, "role": UserRole.CANDIDATE})
     if candidate is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

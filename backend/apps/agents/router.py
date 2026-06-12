@@ -276,7 +276,12 @@ async def _run_negotiate_task(offer_id: str, prompt: str):
     from apps.recruiter.models import Offer
     from langchain_core.messages import SystemMessage, HumanMessage
 
-    offer = await Offer.find_one(Offer.id == offer_id)
+    from beanie import PydanticObjectId
+    try:
+        oid = PydanticObjectId(offer_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid offer ID")
+    offer = await Offer.get(oid)
     if not offer:
         return
 

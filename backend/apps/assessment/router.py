@@ -92,7 +92,12 @@ async def create_assessment(
     if current_user.role != UserRole.RECRUITER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Recruiter only")
 
-    job = await Job.find_one(Job.id == payload.job_id)
+    from beanie import PydanticObjectId
+    try:
+        oid = PydanticObjectId(payload.job_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid job ID")
+    job = await Job.get(oid)
     if not job:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
 

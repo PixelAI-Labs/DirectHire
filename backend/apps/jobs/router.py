@@ -48,7 +48,12 @@ async def list_public_jobs(
     # Let's attach company so the UI can show the company name.
     
     company_ids = list(set([j.company_id for j in jobs]))
-    companies = await Company.find(In(Company.id, company_ids)).to_list()
+    from beanie import PydanticObjectId
+    try:
+        object_ids = [PydanticObjectId(cid) for cid in company_ids]
+    except Exception:
+        object_ids = []
+    companies = await Company.find({"_id": {"$in": object_ids}}).to_list()
     company_map = {str(c.id): c for c in companies}
     
     results = []
@@ -97,7 +102,12 @@ async def get_public_job(id: str):
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
         
-    company = await Company.get(job.company_id)
+    from beanie import PydanticObjectId
+    try:
+        oid = PydanticObjectId(job.company_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid company ID")
+    company = await Company.get(oid)
     if not company:
         raise HTTPException(status_code=404, detail="Company not found")
         
