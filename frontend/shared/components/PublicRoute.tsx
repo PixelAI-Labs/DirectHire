@@ -14,7 +14,7 @@ export const PublicRoute: React.FC<PublicRouteProps> = ({
 }) => {
   const token = localStorage.getItem('token')
   const userStr = localStorage.getItem('user')
-  const user = userStr ? JSON.parse(userStr) : null
+  const user = userStr && userStr !== 'undefined' ? JSON.parse(userStr) : null
   const location = useLocation()
 
   if (token && user) {

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Layout } from './components/Layout'
 import { Home } from './pages/Home'
@@ -130,6 +130,8 @@ const App: React.FC = () => {
               </ProtectedRoute>
             }
           />
+          {/* Catch-all route to redirect unknown URLs (like /candidates) to dashboard */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
       </Routes>
     </AnimatePresence>

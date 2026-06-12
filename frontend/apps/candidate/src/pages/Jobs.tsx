@@ -18,10 +18,13 @@ interface JobItem {
 }
 
 interface JobListResponse {
-  items: JobItem[]
-  total: number
-  page: number
-  limit: number
+  data: JobItem[]
+  pagination: {
+    total: number
+    page: number
+    limit: number
+    total_pages: number
+  }
 }
 
 export const Jobs: React.FC = () => {
@@ -40,8 +43,8 @@ export const Jobs: React.FC = () => {
       if (location) params.location = location
       if (roleType) params.role_type = roleType
       const res = await jobService.listJobs(params as Parameters<typeof jobService.listJobs>[0])
-      const data: JobListResponse = res.data
-      setJobs(data.items ?? data as unknown as JobItem[])
+      const responseData: JobListResponse = res.data
+      setJobs(responseData.data ?? [])
     } catch {
       setJobs([])
     } finally {

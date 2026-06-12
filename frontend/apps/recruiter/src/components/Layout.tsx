@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Outlet, useNavigate, Link } from 'react-router-dom'
-import { ToastProvider, useToast, NotificationPanel } from '@directhire/shared'
+import { useToast, NotificationPanel } from '@directhire/shared'
 import { motion } from 'framer-motion'
 import { Menu, X, LogOut, LayoutDashboard, Briefcase, Building2, Users } from 'lucide-react'
 
@@ -10,7 +10,7 @@ export const Layout: React.FC = () => {
   const navigate = useNavigate()
   const token = localStorage.getItem('token')
   const userStr = localStorage.getItem('user')
-  const user = userStr ? JSON.parse(userStr) : null
+  const user = userStr && userStr !== 'undefined' ? JSON.parse(userStr) : null
 
   const handleLogout = () => {
     localStorage.removeItem('token')
@@ -23,11 +23,10 @@ export const Layout: React.FC = () => {
     { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { label: 'Jobs', href: '/jobs', icon: Briefcase },
     { label: 'Companies', href: '/companies', icon: Building2 },
-    { label: 'Candidates', href: '/candidates', icon: Users },
   ]
 
   return (
-    <ToastProvider>
+    <>
       <div className="flex min-h-screen flex-col bg-[#0c1324] text-[#adc6ff] font-sans">
         {/* Navbar */}
         <nav className="sticky top-0 z-50 h-16 border-b border-[#2a3150] bg-[#0c1324]/80 backdrop-blur-xl">
@@ -163,6 +162,6 @@ export const Layout: React.FC = () => {
           <p>DirectHire - The autonomous hiring platform</p>
         </footer>
       </div>
-    </ToastProvider>
+    </>
   )
 }
