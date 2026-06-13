@@ -2,14 +2,14 @@
 import logging
 
 import httpx
-from app.core.config import settings
+from core.config import settings
 
 logger = logging.getLogger(__name__)
 
 
 class STTService:
     def __init__(self, api_token: str | None = None):
-        self.api_token = api_token or settings.HUGGINGFACE_API_TOKEN
+        self.api_token = api_token or settings.HUGGINGFACE_API_KEY
         self.api_url = "https://api-inference.huggingface.co/models/openai/whisper-large-v3"
 
     async def transcribe(self, audio_bytes: bytes) -> str:

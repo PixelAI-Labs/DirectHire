@@ -5,7 +5,7 @@ import json
 import logging
 
 import google.generativeai as genai
-from app.core.config import settings
+from core.config import settings
 
 logger = logging.getLogger(__name__)
 

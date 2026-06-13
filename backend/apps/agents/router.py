@@ -40,6 +40,14 @@ def _parse_llm_json_response(response_content: str) -> dict:
 
 def _extract_match_score(text: str) -> float:
     """Parse a 0-100 match score from a string that may contain extra text."""
+    # Try to find a number explicitly labeled as score (DOTALL for multi-line responses,
+    # \b to avoid matching "score" inside words like "underscore" or "subscore").
+    m = re.search(r"(?i)\bscore\b.*?(\d+(?:\.\d+)?)", text, re.DOTALL)
+    if m:
+        return float(m.group(1))
+
+    # Fallback to first in-range number, since unlabeled responses often lead
+    # with the score.
     numbers = re.findall(r"\b(\d+(?:\.\d+)?)\b", text)
     for n in numbers:
         val = float(n)

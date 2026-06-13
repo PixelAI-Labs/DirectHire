@@ -1,6 +1,7 @@
 from datetime import timezone
 """Assessment Router"""
 import json
+import logging
 import re
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -17,6 +18,7 @@ from apps.assessment.schemas import (
 )
 from apps.notifications.service import NotificationService
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -115,10 +117,14 @@ async def create_assessment(
     )
     await assessment.insert()
     
-    await NotificationService.notify_assessment_assigned(
-        candidate_id=assessment.candidate_id,
-        job_title=job.title
-    )
+    try:
+        await NotificationService.notify_assessment_assigned(
+            candidate_id=assessment.candidate_id,
+            job_title=job.title,
+            assessment_id=str(assessment.id)
+        )
+    except Exception:
+        logger.exception("Failed to send assessment notification")
     
     return _assessment_to_out(assessment)
 
