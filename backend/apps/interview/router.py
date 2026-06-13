@@ -1,5 +1,4 @@
 """Interview Router"""
-from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 
 from apps.auth.models import User, UserRole
@@ -46,6 +45,24 @@ def _interview_to_out(i: Interview) -> InterviewOut:
     )
 
 
+async def _safe_get_interview(interview_id: str) -> Interview:
+    """Fetch an Interview by id, returning HTTP 400 for malformed IDs.
+
+    Beanie's Document.get() raises pydantic_core.ValidationError inside
+    get() for non-ObjectId strings, so the simple `if not interview`
+    pattern returns 500. This wrapper converts first, then fetches.
+    """
+    from beanie import PydanticObjectId
+    try:
+        oid = PydanticObjectId(interview_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid interview ID")
+    interview = await Interview.get(oid)
+    if not interview:
+        raise HTTPException(status_code=404, detail="Interview not found")
+    return interview
+
+
 @router.post("/", response_model=InterviewOut, status_code=status.HTTP_201_CREATED)
 async def create_interview(
     payload: InterviewCreate,
@@ -73,12 +90,16 @@ async def create_interview(
         status="SCHEDULED",
     )
     await interview.insert()
-    
-    await NotificationService.notify_interview_scheduled(
-        candidate_id=interview.candidate_id,
-        recruiter_id=interview.recruiter_id,
-        job_title=job.title
-    )
+    try:
+        await NotificationService.notify_interview_scheduled(
+            candidate_id=interview.candidate_id,
+            recruiter_id=interview.recruiter_id,
+            job_title=job.title,
+            interview_id=str(interview.id)
+        )
+    except Exception as e:
+        import logging
+        logging.warning(f"Failed to send interview notification: {e}")
     
     return _interview_to_out(interview)
 
@@ -103,9 +124,7 @@ async def get_interview(
     current_user: User = Depends(get_current_user),
 ):
     """Get a single interview."""
-    interview = await Interview.get(interview_id)
-    if not interview:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Interview not found")
+    interview = await _safe_get_interview(interview_id)
 
     if current_user.role == UserRole.CANDIDATE and interview.candidate_id != str(current_user.id):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
@@ -122,9 +141,7 @@ async def update_interview(
     current_user: User = Depends(get_current_user),
 ):
     """Update interview details, notes, or scores."""
-    interview = await Interview.get(interview_id)
-    if not interview:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Interview not found")
+    interview = await _safe_get_interview(interview_id)
 
     # Candidates can only update their own interviews
     if current_user.role == UserRole.CANDIDATE and interview.candidate_id != str(current_user.id):
@@ -148,9 +165,7 @@ async def delete_interview(
     if current_user.role != UserRole.RECRUITER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Recruiter only")
 
-    interview = await Interview.get(interview_id)
-    if not interview:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Interview not found")
+    interview = await _safe_get_interview(interview_id)
 
     if interview.recruiter_id != str(current_user.id):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
@@ -198,9 +213,7 @@ async def submit_answer(
     current_user: User = Depends(get_current_user),
 ):
     """Append a Q&A pair to the interview document."""
-    interview = await Interview.get(interview_id)
-    if not interview:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Interview not found")
+    interview = await _safe_get_interview(interview_id)
 
     if (
         current_user.role == UserRole.CANDIDATE
@@ -232,9 +245,7 @@ async def generate_next_question(
     Generate the next interview question using Gemini.
     Body: { previous_qa: list[dict] }
     """
-    interview = await Interview.get(interview_id)
-    if not interview:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Interview not found")
+    interview = await _safe_get_interview(interview_id)
 
     if (
         current_user.role == UserRole.CANDIDATE
@@ -244,7 +255,7 @@ async def generate_next_question(
 
     job = await Job.get(interview.job_id)
     job_title = job.title if job else ""
-    skills = list(job.required_skills) if job and job.required_skills else []
+    skills = list(job.skills) if job and job.skills else []
     previous_qa = body.get("previous_qa", [])
 
     ai_service = InterviewAIService()
@@ -258,9 +269,7 @@ async def evaluate_interview(
     current_user: User = Depends(get_current_user),
 ):
     """Evaluate the interview session and persist scores to the Interview document."""
-    interview = await Interview.get(interview_id)
-    if not interview:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Interview not found")
+    interview = await _safe_get_interview(interview_id)
 
     if (
         current_user.role == UserRole.CANDIDATE
@@ -271,7 +280,7 @@ async def evaluate_interview(
     # Fetch job details for context
     job = await Job.get(interview.job_id)
     job_title = job.title if job else ""
-    skills = list(job.required_skills) if job and job.required_skills else []
+    skills = list(job.skills) if job and job.skills else []
 
     eval_service = InterviewEvaluationService()
     result = await eval_service.evaluate_session(
