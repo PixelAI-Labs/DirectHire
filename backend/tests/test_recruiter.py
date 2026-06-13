@@ -31,9 +31,10 @@ async def test_create_job(async_client: AsyncClient, recruiter_token, test_recru
             "description": "Test Job",
             "requirements": ["Python"],
             "skills": ["Python"],
-            "salary_range": "100k-150k",
+            "salary_min": 100000,
+            "salary_max": 150000,
             "location": "Remote",
-            "employment_type": "FULL_TIME"
+            "role_type": "FULL_TIME"
         }
     )
     assert response.status_code == 201

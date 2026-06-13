@@ -56,7 +56,12 @@ async def create_job(
             detail="Recruiter must be associated with a company",
         )
 
-    company = await Company.get(current_user.company_id)
+    from beanie import PydanticObjectId
+    try:
+        oid = PydanticObjectId(current_user.company_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid company ID format")
+    company = await Company.get(oid)
     if company is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -280,7 +285,7 @@ async def create_offer(
 
     # Notify candidate
     await NotificationService.notify_offer_created(
-        payload.candidate_id, payload.job_id, job.title, str(offer.id)
+        payload.candidate_id, job.title, str(offer.id)
     )
 
     return OfferOut(

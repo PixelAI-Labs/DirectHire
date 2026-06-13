@@ -4,8 +4,8 @@ from unittest.mock import patch, AsyncMock
 from apps.recruiter.models import Job
 
 @pytest.mark.asyncio
-@patch("apps.agents.router.hiring_agent")
-async def test_screen_candidate(mock_hiring_agent, async_client: AsyncClient, test_candidate, recruiter_token, test_recruiter):
+@patch("apps.agents.router.hiring_agent.screen_resume", new_callable=AsyncMock)
+async def test_screen_candidate(mock_screen_resume, async_client: AsyncClient, test_candidate, recruiter_token, test_recruiter):
     comp_res = await async_client.post(
         "/api/companies/",
         headers=recruiter_token,
@@ -24,21 +24,22 @@ async def test_screen_candidate(mock_hiring_agent, async_client: AsyncClient, te
             "description": "Test Job",
             "requirements": ["Python"],
             "skills": ["Python"],
-            "salary_range": "100k-150k",
+            "salary_min": 100000,
+            "salary_max": 150000,
             "location": "Remote",
-            "employment_type": "FULL_TIME"
+            "role_type": "FULL_TIME"
         }
     )
     job_id = job_res.json()["id"]
 
-    mock_hiring_agent.screen_resume = AsyncMock(return_value={
+    mock_screen_resume.return_value = {
         "eligibility_score": 85.0,
         "suitability_score": 85.0,
         "potential_score": 90.0,
         "summary": "Great candidate",
         "strengths": ["Python"],
         "concerns": ["Java"]
-    })
+    }
 
     response = await async_client.post(
         "/api/agents/screen",

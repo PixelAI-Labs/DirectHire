@@ -25,7 +25,7 @@ class Settings(BaseSettings):
 
     # AI APIs
     GEMMA_API_KEY: str = ""
-    GEMMA_API_BASE_URL: str = "https://generativelanguage.googleapis.com/v1beta"
+    GEMMA_API_BASE_URL: str = "https://generativelanguage.googleapis.com/v1beta/openai"
     GEMMA_E4B_MODEL: str = "gemma-4-26b-a4b-it"
     GEMMA_MOE_MODEL: str = "gemma-4-31b-it"
     GEMMA_DENSE_MODEL: str = "gemma-4-31b-it"

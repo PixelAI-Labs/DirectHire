@@ -16,9 +16,12 @@ from apps.interview.models import Interview
 from apps.notifications.models import Notification
 
 from apps.auth.security import create_access_token
+from passlib.context import CryptContext
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+TEST_PASSWORD_HASH = pwd_context.hash("password123")
 
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture(scope="session")
 async def db():
     """Setup a test database and initialize Beanie."""
     # Ensure we use a test database
@@ -43,6 +46,18 @@ async def db():
     client.close()
 
 
+@pytest_asyncio.fixture(autouse=True)
+async def clear_db(db):
+    """Clear all collections before each test."""
+    models = [
+        User, CandidateProfile, Resume, Application,
+        Job, Ranking, Offer, Company, AgentEvent,
+        Assessment, Interview, Notification
+    ]
+    for model in models:
+        await model.delete_all()
+    yield
+
 @pytest_asyncio.fixture
 async def async_client(db):
     """Provides an AsyncClient for testing FastAPI endpoints."""
@@ -53,12 +68,9 @@ async def async_client(db):
 @pytest_asyncio.fixture
 async def test_candidate(db):
     """Create and return a test candidate user."""
-    from passlib.context import CryptContext
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    
     user = User(
         email="candidate@test.com",
-        hashed_password=pwd_context.hash("password123"),
+        hashed_password=TEST_PASSWORD_HASH,
         full_name="Test Candidate",
         role=UserRole.CANDIDATE
     )
@@ -69,12 +81,9 @@ async def test_candidate(db):
 @pytest_asyncio.fixture
 async def test_recruiter(db):
     """Create and return a test recruiter user."""
-    from passlib.context import CryptContext
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    
     user = User(
         email="recruiter@test.com",
-        hashed_password=pwd_context.hash("password123"),
+        hashed_password=TEST_PASSWORD_HASH,
         full_name="Test Recruiter",
         role=UserRole.RECRUITER
     )
@@ -82,14 +91,14 @@ async def test_recruiter(db):
     return user
 
 
-@pytest_asyncio.fixture
+@pytest.fixture
 def candidate_token(test_candidate):
     """Return a valid auth header for the candidate."""
     token = create_access_token({"sub": test_candidate.email})
     return {"Authorization": f"Bearer {token}"}
 
 
-@pytest_asyncio.fixture
+@pytest.fixture
 def recruiter_token(test_recruiter):
     """Return a valid auth header for the recruiter."""
     token = create_access_token({"sub": test_recruiter.email})

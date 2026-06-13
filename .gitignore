@@ -63,3 +63,18 @@ tmp/
 graphify-out/.*
 graphify-out/cache/
 backend_exploration_summary.md
+
+# Local review / handoff notes (working, not deliverables)
+backend/review-findings-*.md
+
+# Local Agent / IDE Configs & Cache
+.claude/
+.remember/
+.playwright-mcp/
+
+# Local Python Environments
+graphify-venv/
+
+# Local test assets / scripts
+create_resume.py
+dummy_resume.pdf
