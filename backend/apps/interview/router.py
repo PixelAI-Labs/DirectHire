@@ -1,4 +1,5 @@
 """Interview Router"""
+import logging
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 
 from apps.auth.models import User, UserRole
@@ -15,6 +16,7 @@ from apps.interview.ai_service import InterviewAIService
 from apps.interview.evaluation_service import InterviewEvaluationService
 from apps.notifications.service import NotificationService
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 MAX_AUDIO_SIZE = 10 * 1024 * 1024  # 10MB
@@ -97,9 +99,8 @@ async def create_interview(
             job_title=job.title,
             interview_id=str(interview.id)
         )
-    except Exception as e:
-        import logging
-        logging.warning(f"Failed to send interview notification: {e}")
+    except Exception:
+        logger.exception("Failed to send interview notification")
     
     return _interview_to_out(interview)
 
