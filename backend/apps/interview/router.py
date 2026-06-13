@@ -55,14 +55,42 @@ async def _safe_get_interview(interview_id: str) -> Interview:
     pattern returns 500. This wrapper converts first, then fetches.
     """
     from beanie import PydanticObjectId
+    from bson.errors import InvalidId
     try:
         oid = PydanticObjectId(interview_id)
-    except Exception:
+    except (ValueError, TypeError, InvalidId):
         raise HTTPException(status_code=400, detail="Invalid interview ID")
     interview = await Interview.get(oid)
     if not interview:
         raise HTTPException(status_code=404, detail="Interview not found")
     return interview
+
+
+async def _safe_get_job(job_id: str) -> Job:
+    """Fetch a Job by id, returning HTTP 400 for malformed IDs and 404 for missing."""
+    from beanie import PydanticObjectId
+    from bson.errors import InvalidId
+    try:
+        oid = PydanticObjectId(job_id)
+    except (ValueError, TypeError, InvalidId):
+        raise HTTPException(status_code=400, detail="Invalid job ID")
+    job = await Job.get(oid)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return job
+
+
+async def _try_get_job(job_id: str):
+    """Fetch a Job by id, returning None on malformed ID or missing doc.
+    Use in background tasks where the caller can't raise HTTPException.
+    """
+    from beanie import PydanticObjectId
+    from bson.errors import InvalidId
+    try:
+        oid = PydanticObjectId(job_id)
+    except (ValueError, TypeError, InvalidId):
+        return None
+    return await Job.get(oid)
 
 
 @router.post("/", response_model=InterviewOut, status_code=status.HTTP_201_CREATED)
@@ -254,7 +282,7 @@ async def generate_next_question(
     ):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
 
-    job = await Job.get(interview.job_id)
+    job = await _try_get_job(interview.job_id)
     job_title = job.title if job else ""
     skills = list(job.skills) if job and job.skills else []
     previous_qa = body.get("previous_qa", [])
@@ -279,7 +307,7 @@ async def evaluate_interview(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
 
     # Fetch job details for context
-    job = await Job.get(interview.job_id)
+    job = await _try_get_job(interview.job_id)
     job_title = job.title if job else ""
     skills = list(job.skills) if job and job.skills else []
 

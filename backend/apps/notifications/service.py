@@ -63,9 +63,9 @@ class NotificationService:
         # Emit WebSocket event
         sids = list(connected_users.get(user_id, set()))
         if sids:
-            for sid in sids:
-                try:
-                    await sio.emit(
+            results = await asyncio.gather(
+                *(
+                    sio.emit(
                         "new_notification",
                         {
                             "id": str(notification.id),
@@ -74,12 +74,17 @@ class NotificationService:
                             "message": notification.message,
                             "created_at": notification.created_at.isoformat(),
                             "read": notification.read,
-                            "related_id": notification.related_id
+                            "related_id": notification.related_id,
                         },
-                        to=sid
+                        to=sid,
                     )
-                except Exception as e:
-                    logger.warning(f"[Socket] Failed to emit notification to {sid}: {e}")
+                    for sid in sids
+                ),
+                return_exceptions=True,
+            )
+            for sid, r in zip(sids, results):
+                if isinstance(r, Exception):
+                    logger.warning("[Socket] Failed to emit notification to %s: %r", sid, r)
 
         return notification
 
@@ -182,7 +187,7 @@ class NotificationService:
         )
         for r in results:
             if isinstance(r, Exception):
-                logger.warning(f"[notify_interview_scheduled] partial failure: {r}")
+                logger.warning("[notify_interview_scheduled] partial failure", exc_info=r)
 
     @staticmethod
     async def notify_assessment_assigned(candidate_id: str, job_title: str, assessment_id: str) -> None:

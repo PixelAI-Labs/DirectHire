@@ -1,5 +1,6 @@
 """Agent Orchestrator Router"""
 import json
+import logging
 import re
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 
@@ -22,6 +23,9 @@ from apps.company.models import Company
 from apps.auth.models import User
 from apps.recruiter.models import Job as RecruiterJob
 from apps.recruiter.models import Ranking
+from apps.interview.router import _safe_get_job, _try_get_job
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -42,9 +46,10 @@ def _extract_match_score(text: str) -> float:
     """Parse a 0-100 match score from a string that may contain extra text."""
     # Try to find a number explicitly labeled as score (DOTALL for multi-line responses,
     # \b to avoid matching "score" inside words like "underscore" or "subscore").
-    m = re.search(r"(?i)\bscore\b.*?(\d+(?:\.\d+)?)", text, re.DOTALL)
+    m = re.search(r"(?i)\bscore\b.*?(-?\d+(?:\.\d+)?)", text, re.DOTALL)
     if m:
-        return float(m.group(1))
+        val = float(m.group(1))
+        return max(0.0, min(100.0, val))
 
     # Fallback to first in-range number, since unlabeled responses often lead
     # with the score.
@@ -91,7 +96,7 @@ async def _run_match_task(candidate_id: str, job_id: str):
     try:
         # Fetch data
         resume_text = await _get_candidate_resume_text(candidate_id)
-        job = await RecruiterJob.get(job_id)
+        job = await _try_get_job(job_id)
         if not job:
             return
 
@@ -161,8 +166,8 @@ async def _run_match_task(candidate_id: str, job_id: str):
             )
             await ranking.save()
 
-    except Exception as e:
-        print(f"[match] Error: {e}")
+    except Exception:
+        logger.exception("[match] failed")
 
 
 # ─── /api/agents/analyze ──────────────────────────────────────────────────────
@@ -211,8 +216,8 @@ async def _run_analyze_task(candidate_id: str):
         )
         await event.insert()
 
-    except Exception as e:
-        print(f"[analyze] Error: {e}")
+    except Exception:
+        logger.exception("[analyze] failed")
 
 
 # ─── /api/agents/schedule ─────────────────────────────────────────────────────
@@ -264,8 +269,8 @@ async def _run_schedule_task(candidate_id: str, job_id: str, prompt: str):
         )
         await event.insert()
 
-    except Exception as e:
-        print(f"[schedule] Error: {e}")
+    except Exception:
+        logger.exception("[schedule] failed")
 
 
 # ─── /api/agents/negotiate ────────────────────────────────────────────────────
@@ -293,7 +298,7 @@ async def _run_negotiate_task(offer_id: str, prompt: str):
     if not offer:
         return
 
-    job = await RecruiterJob.get(offer.job_id)
+    job = await _try_get_job(offer.job_id)
 
     system_prompt = (
         "You are an expert salary negotiation coach. Based on the offer details and the "
@@ -333,8 +338,8 @@ async def _run_negotiate_task(offer_id: str, prompt: str):
         )
         await event.insert()
 
-    except Exception as e:
-        print(f"[negotiate] Error: {e}")
+    except Exception:
+        logger.exception("[negotiate] failed")
 
 
 # ─── /api/agents/screen ───────────────────────────────────────────────────────
@@ -343,9 +348,7 @@ async def _run_negotiate_task(offer_id: str, prompt: str):
 async def screen_candidate(payload: ScreenRequest):
     """Direct call to HiringAgent.screen_resume."""
     resume_text = await _get_candidate_resume_text(payload.candidate_id)
-    job = await RecruiterJob.get(payload.job_id)
-    if not job:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
+    job = await _safe_get_job(payload.job_id)
 
     job_description = (
         f"{job.title}\n{job.description}\n"
@@ -377,9 +380,7 @@ async def rank_candidates(payload: RankRequest):
     Call HiringAgent.rank_candidates for all applicants of a given job.
     Returns ranked list sorted by overall_score descending.
     """
-    job = await RecruiterJob.get(payload.job_id)
-    if not job:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
+    job = await _safe_get_job(payload.job_id)
 
     applications = await Application.find(Application.job_id == payload.job_id).to_list()
 
@@ -456,9 +457,7 @@ async def analyze_assessment_endpoint(
     """
     Call HiringAgent.analyze_assessment to evaluate test results.
     """
-    job = await RecruiterJob.get(job_id)
-    if not job:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
+    job = await _safe_get_job(job_id)
 
     result = await hiring_agent.analyze_assessment(
         assessment_results,
@@ -504,10 +503,7 @@ async def draft_offer_endpoint(payload: DraftOfferRequest):
     """
     profile = await CandidateProfile.find_one(CandidateProfile.user_id == payload.candidate_id)
     candidate_user = await User.get(payload.candidate_id)
-    job = await RecruiterJob.get(payload.job_id)
-
-    if not job:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
+    job = await _safe_get_job(payload.job_id)
 
     company = await Company.get(job.company_id) if job.company_id else None
 

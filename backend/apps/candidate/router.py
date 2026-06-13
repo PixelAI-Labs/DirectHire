@@ -2,6 +2,7 @@
 Candidate Router — Profile, Resumes, Applications
 """
 import os
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from beanie.operators import In
 from bson.errors import InvalidId
@@ -22,6 +23,8 @@ from apps.candidate.schemas import (
 )
 from apps.candidate.gemma_ocr_service import extract_resume_with_gemma
 from apps.upload.router import save_upload_file
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -140,7 +143,7 @@ async def _fetch_jobs_for_items(items):
         try:
             obj_job_ids.append(PydanticObjectId(jid))
         except (ValueError, TypeError, InvalidId):
-            pass
+            logger.warning("dropping malformed job_id: %r", jid)
     
     jobs = await Job.find(In(Job.id, obj_job_ids)).to_list()
     company_ids = list(set([j.company_id for j in jobs]))
@@ -150,7 +153,7 @@ async def _fetch_jobs_for_items(items):
         try:
             obj_comp_ids.append(PydanticObjectId(cid))
         except (ValueError, TypeError, InvalidId):
-            pass
+            logger.warning("dropping malformed company_id: %r", cid)
             
     companies = await Company.find(In(Company.id, obj_comp_ids)).to_list()
     company_map = {str(c.id): c for c in companies}
