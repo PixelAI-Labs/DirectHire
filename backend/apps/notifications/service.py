@@ -2,12 +2,10 @@
 Notification Service — internal helpers for creating notifications and sending emails
 """
 
+import asyncio
 import logging
-from datetime import datetime
-
 from apps.notifications.models import Notification
 from apps.recruiter.models import Job
-from apps.candidate.models import Application
 from core.config import settings
 from core.socket import sio, connected_users
 
@@ -63,7 +61,7 @@ class NotificationService:
         await notification.insert()
         
         # Emit WebSocket event
-        sids = connected_users.get(user_id, set())
+        sids = list(connected_users.get(user_id, set()))
         if sids:
             for sid in sids:
                 try:
@@ -122,7 +120,7 @@ class NotificationService:
 
     @staticmethod
     async def notify_offer_created(
-        candidate_id: str, job_id: str, job_title: str, offer_id: str
+        candidate_id: str, job_title: str, offer_id: str
     ) -> None:
         """Recruiter created offer → notify candidate."""
         await NotificationService.create(
@@ -158,27 +156,41 @@ class NotificationService:
         )
 
     @staticmethod
-    async def notify_interview_scheduled(candidate_id: str, recruiter_id: str, job_title: str) -> None:
-        """Interview scheduled → both parties notified."""
-        await NotificationService.create(
-            user_id=candidate_id,
-            type="INTERVIEW",
-            title="Interview Scheduled",
-            message=f"An interview for '{job_title}' has been scheduled.",
+    async def notify_interview_scheduled(candidate_id: str, recruiter_id: str, job_title: str, interview_id: str) -> None:
+        """Interview scheduled → both parties notified.
+
+        Uses asyncio.gather(return_exceptions=True) so a failure in one
+        notification does not cancel the other. Both DB writes are
+        attempted; any exception is logged at warning level.
+        """
+        results = await asyncio.gather(
+            NotificationService.create(
+                user_id=candidate_id,
+                type="INTERVIEW",
+                title="Interview Scheduled",
+                message=f"An interview for '{job_title}' has been scheduled.",
+                related_id=interview_id,
+            ),
+            NotificationService.create(
+                user_id=recruiter_id,
+                type="INTERVIEW",
+                title="Interview Scheduled",
+                message=f"An interview for '{job_title}' has been scheduled with the candidate.",
+                related_id=interview_id,
+            ),
+            return_exceptions=True,
         )
-        await NotificationService.create(
-            user_id=recruiter_id,
-            type="INTERVIEW",
-            title="Interview Scheduled",
-            message=f"An interview for '{job_title}' has been scheduled with the candidate.",
-        )
+        for r in results:
+            if isinstance(r, Exception):
+                logger.warning(f"[notify_interview_scheduled] partial failure: {r}")
 
     @staticmethod
-    async def notify_assessment_assigned(candidate_id: str, job_title: str) -> None:
+    async def notify_assessment_assigned(candidate_id: str, job_title: str, assessment_id: str) -> None:
         """Assessment assigned → candidate notified."""
         await NotificationService.create(
             user_id=candidate_id,
             type="ASSESSMENT",
             title="Assessment Assigned",
             message=f"You have been assigned a new assessment for '{job_title}'.",
+            related_id=assessment_id,
         )
