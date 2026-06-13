@@ -4,6 +4,7 @@ Candidate Router — Profile, Resumes, Applications
 import os
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from beanie.operators import In
+from bson.errors import InvalidId
 
 from core.config import settings
 from apps.auth.models import User, UserRole
@@ -97,7 +98,7 @@ async def upload_resume(
     prefix = f"{current_user.id}_"
     file_path, _ = await save_upload_file(file, "resumes", prefix=prefix)
 
-    # Extract text using Gemma 27B / PyPDF2
+    # Extract text using Gemma 27B / pypdf
     parsed_text = await extract_resume_with_gemma(file_path)
 
     # Check if a resume already exists for the user
@@ -131,11 +132,27 @@ async def upload_resume(
 async def _fetch_jobs_for_items(items):
     job_ids = list(set([item.job_id for item in items]))
     if not job_ids:
-        return []
+        return {}
     
-    jobs = await Job.find(In(Job.id, job_ids)).to_list()
+    from beanie import PydanticObjectId
+    obj_job_ids = []
+    for jid in job_ids:
+        try:
+            obj_job_ids.append(PydanticObjectId(jid))
+        except (ValueError, TypeError, InvalidId):
+            pass
+    
+    jobs = await Job.find(In(Job.id, obj_job_ids)).to_list()
     company_ids = list(set([j.company_id for j in jobs]))
-    companies = await Company.find(In(Company.id, company_ids)).to_list()
+    
+    obj_comp_ids = []
+    for cid in company_ids:
+        try:
+            obj_comp_ids.append(PydanticObjectId(cid))
+        except (ValueError, TypeError, InvalidId):
+            pass
+            
+    companies = await Company.find(In(Company.id, obj_comp_ids)).to_list()
     company_map = {str(c.id): c for c in companies}
     
     jobs_map = {}
