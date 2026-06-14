@@ -58,6 +58,7 @@ from apps.interview.router import router as interview_router
 from apps.notifications.router import router as notifications_router
 from apps.upload.router import router as upload_router
 from apps.analytics.router import router as analytics_router
+from apps.offers.router import router as offers_router
 
 # Register routers
 app.include_router(auth_router, prefix="/api/auth", tags=["Auth"])
@@ -71,6 +72,7 @@ app.include_router(interview_router, prefix="/api/interviews", tags=["Interviews
 app.include_router(notifications_router, prefix="/api/notifications", tags=["Notifications"])
 app.include_router(upload_router, prefix="/api/upload", tags=["Upload"])
 app.include_router(analytics_router, prefix="/api/analytics", tags=["Analytics"])
+app.include_router(offers_router, prefix="/api/offers", tags=["Offers"])
 
 # Static file serving for uploads
 upload_dir = os.path.join(os.path.dirname(__file__), settings.UPLOAD_DIR)

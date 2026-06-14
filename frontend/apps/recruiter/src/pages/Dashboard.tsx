@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { Card, Badge, Skeleton } from '@directhire/shared'
 import { useReveal, useReducedMotion, fadeUp, staggerFast } from '@directhire/shared/motion'
 import { motion } from 'framer-motion'
-import { recruiterService } from '@directhire/shared/services'
+import { analyticsService } from '@directhire/shared/services'
+import type { DashboardResponse } from '@directhire/shared'
 import {
   Briefcase, Users, Calendar, Mail, TrendingUp, CheckCircle, RefreshCw, Send,
   FileText, ChevronRight,
@@ -73,18 +74,32 @@ const VBar: React.FC<{ a: number; int: number; h: number; l: string }> = ({ a, i
 )
 
 // ── Dashboard ──────────────────────────────────────────────────────────────────
+
+const EMPTY_DASHBOARD: DashboardResponse = {
+  open_jobs: 0,
+  total_candidates: 0,
+  candidates_in_pipeline: 0,
+  interviews_this_week: 0,
+  offers_sent: 0,
+  pipeline_stages: {
+    applied: 0,
+    screening: 0,
+    assessment: 0,
+    interview: 0,
+    offer: 0,
+    rejected: 0,
+    hired: 0,
+  },
+  top_candidates: [],
+}
+
 export const Dashboard: React.FC = () => {
   const reduced = useReducedMotion()
   const r1 = useReveal(); const r2 = useReveal(); const r3 = useReveal(); const r4 = useReveal()
   const mv = reduced ? {} : { initial: 'hidden', animate: 'visible', variants: fadeUp }
 
   const [loading, setLoading] = useState(true)
-  const [openJobs, setOpenJobs] = useState(0)
-  const [totalCandidates, setTotalCandidates] = useState(0)
-  const [interviewsThisWeek, setInterviewsThisWeek] = useState(0)
-  const [offersSent, setOffersSent] = useState(0)
-  const [topCandidates, setTopCandidates] = useState<any[]>([])
-  const [rankings, setRankings] = useState<any[]>([])
+  const [data, setData] = useState<DashboardResponse>(EMPTY_DASHBOARD)
 
   useEffect(() => {
     fetchDashboardData()
@@ -93,49 +108,23 @@ export const Dashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     setLoading(true)
     try {
-      const [jobsRes, rankingsRes] = await Promise.all([
-        recruiterService.listJobs(),
-        recruiterService.getRankings(),
-      ])
-
-      const jobs = jobsRes.data || []
-      const openCount = jobs.filter((j: any) => j.status === 'OPEN').length
-      setOpenJobs(openCount)
-      setInterviewsThisWeek(Math.floor(Math.random() * 15) + 5) // placeholder until backend provides this
-      setOffersSent(0)
-
-      const allRankings = rankingsRes.data || []
-      setRankings(allRankings)
-
-      // Get unique candidates sorted by overall_score
-      const candidateMap = new Map<string, any>()
-      allRankings.forEach((r: any) => {
-        if (!candidateMap.has(r.candidate_id)) {
-          candidateMap.set(r.candidate_id, r)
-        } else {
-          const existing = candidateMap.get(r.candidate_id)
-          if (r.overall_score > (existing.overall_score || 0)) {
-            candidateMap.set(r.candidate_id, r)
-          }
-        }
-      })
-      const sorted = Array.from(candidateMap.values())
-        .sort((a, b) => (b.overall_score || 0) - (a.overall_score || 0))
-        .slice(0, 5)
-      setTopCandidates(sorted)
-      setTotalCandidates(candidateMap.size)
+      const res = await analyticsService.getDashboard()
+      // axios wraps the response — payload is on `.data`
+      const payload = (res as any).data ?? res
+      setData(payload as DashboardResponse)
     } catch (error: any) {
       console.error('Failed to load dashboard data:', error)
+      setData(EMPTY_DASHBOARD)
     } finally {
       setLoading(false)
     }
   }
 
   const stats = [
-    { icon: <Briefcase size={20} />, label: 'Open Positions', value: loading ? '...' : String(openJobs) },
-    { icon: <Users size={20} />, label: 'Candidates in Pipeline', value: loading ? '...' : String(totalCandidates) },
-    { icon: <Calendar size={20} />, label: 'Interviews This Week', value: loading ? '...' : String(interviewsThisWeek) },
-    { icon: <Mail size={20} />, label: 'Offers Sent', value: loading ? '...' : String(offersSent) },
+    { icon: <Briefcase size={20} />, label: 'Open Positions', value: loading ? '...' : String(data.open_jobs) },
+    { icon: <Users size={20} />, label: 'Candidates in Pipeline', value: loading ? '...' : String(data.candidates_in_pipeline) },
+    { icon: <Calendar size={20} />, label: 'Interviews This Week', value: loading ? '...' : String(data.interviews_this_week) },
+    { icon: <Mail size={20} />, label: 'Offers Sent', value: loading ? '...' : String(data.offers_sent) },
   ]
 
   const aiActions = [
@@ -145,8 +134,8 @@ export const Dashboard: React.FC = () => {
     { icon: <FileText size={16} />, color: 'text-primary', desc: 'Candidate profiles analyzed', time: '' },
   ]
 
-  const candidates = topCandidates.map((c) => ({
-    i: c.full_name?.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || '??',
+  const candidates = (data.top_candidates || []).map((c) => ({
+    i: (c.full_name || '?').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || '??',
     n: c.full_name || 'Unknown',
     r: 'Candidate',
     s: Math.round(c.overall_score || 0),
@@ -156,25 +145,32 @@ export const Dashboard: React.FC = () => {
     ai: parseFloat(((c.overall_score || 0) / 10).toFixed(1)),
   }))
 
-  const matchScores = topCandidates.map((c) => ({
+  const matchScores = (data.top_candidates || []).map((c) => ({
     name: c.full_name || 'Unknown',
     s: Math.round(c.overall_score || 0),
   }))
 
-  const pipelineCounts = () => {
-    const stages = { applied: 0, screened: 0, interview: 0, offer: 0, hired: 0 }
-    rankings.forEach((r: any) => {
-      const status = r.application_status?.toUpperCase()
-      if (status === 'APPLIED') stages.applied++
-      else if (status === 'SCREENING' || status === 'ASSESSMENT') stages.screened++
-      else if (status === 'INTERVIEW') stages.interview++
-      else if (status === 'OFFER') stages.offer++
-      else if (status === 'HIRED') stages.hired++
-    })
-    return stages
-  }
+  const skeletonScores = [1, 2, 3, 4, 5].map((i) => (
+    <div key={i} className="flex items-center gap-3">
+      <Skeleton className="h-4 w-24" />
+      <div className="flex-1 h-2 bg-surface-raised rounded-full overflow-hidden">
+        <Skeleton className="h-full rounded-full" width={`${60 + i * 5}%`} />
+      </div>
+      <Skeleton className="h-4 w-8" />
+    </div>
+  ))
 
-  const pCounts = pipelineCounts()
+  const scoreBars = matchScores.map(({ name, s }) => (
+    <div key={name} className="flex items-center gap-3">
+      <span className="text-xs text-text-muted w-24 truncate">{name}</span>
+      <div className="flex-1 h-2 bg-surface-raised rounded-full overflow-hidden">
+        <div className="h-full bg-gradient-to-r from-primary to-secondary rounded-full" style={{ width: `${s}%` }} />
+      </div>
+      <span className="text-xs text-text-muted w-8 text-right">{s}%</span>
+    </div>
+  ))
+
+  const pCounts = data.pipeline_stages
 
   return (
     <div className="space-y-8 p-6 max-w-7xl mx-auto">
@@ -210,7 +206,7 @@ export const Dashboard: React.FC = () => {
               <div className="flex items-center">
                 <Stage label="Applied" count={loading ? 0 : pCounts.applied} color="text-primary" />
                 <div className="px-1 flex items-center"><ChevronRight size={16} className="text-border" /></div>
-                <Stage label="Screened" count={loading ? 0 : pCounts.screened} color="text-secondary" />
+                <Stage label="Screened" count={loading ? 0 : pCounts.screening} color="text-secondary" />
                 <div className="px-1 flex items-center"><ChevronRight size={16} className="text-border" /></div>
                 <Stage label="Interview" count={loading ? 0 : pCounts.interview} color="text-primary" />
                 <div className="px-1 flex items-center"><ChevronRight size={16} className="text-border" /></div>
@@ -303,26 +299,7 @@ export const Dashboard: React.FC = () => {
                 <p className="text-text-muted text-sm py-4 text-center">No match data yet.</p>
               ) : (
                 <div className="space-y-3">
-                  {loading
-                    ? [1, 2, 3, 4, 5].map((i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <Skeleton className="h-4 w-24" />
-                        <div className="flex-1 h-2 bg-surface-raised rounded-full overflow-hidden">
-                          <Skeleton className="h-full rounded-full" width={`${60 + i * 5}%`} />
-                        </div>
-                        <Skeleton className="h-4 w-8" />
-                      </div>
-                    ))
-                    : matchScores.map(({ name, s }) => (
-                      <div key={name} className="flex items-center gap-3">
-                        <span className="text-xs text-text-muted w-24 truncate">{name}</span>
-                        <div className="flex-1 h-2 bg-surface-raised rounded-full overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-primary to-secondary rounded-full" style={{ width: `${s}%` }} />
-                        </div>
-                        <span className="text-xs text-text-muted w-8 text-right">{s}%</span>
-                      </div>
-                    ))
-                  }
+                  {loading ? skeletonScores : scoreBars}
                 </div>
               )}
             </Card>

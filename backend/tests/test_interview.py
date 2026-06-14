@@ -5,6 +5,29 @@ from unittest.mock import patch, AsyncMock
 from datetime import datetime, timezone
 
 
+# ─── Smoke test: /api/interviews is registered (review finding #1) ──
+
+@pytest.mark.asyncio
+async def test_interviews_route_registered_at_api_interviews(
+    async_client: AsyncClient, candidate_token
+):
+    """GET /api/interviews/ (candidate) returns 200 with a list — proves the
+    interview router is registered at /api/interviews in main.py."""
+    response = await async_client.get("/api/interviews/", headers=candidate_token)
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+
+
+@pytest.mark.asyncio
+async def test_interviews_route_registered_recruiter_view(
+    async_client: AsyncClient, recruiter_token
+):
+    """Recruiter view also returns 200 with a list (possibly empty)."""
+    response = await async_client.get("/api/interviews/", headers=recruiter_token)
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+
+
 @pytest.mark.asyncio
 async def test_create_interview(async_client: AsyncClient, recruiter_token, test_candidate, test_job):
     response = await async_client.post(

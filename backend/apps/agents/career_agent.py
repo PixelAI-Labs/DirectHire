@@ -6,7 +6,7 @@ class CareerAgent:
     @property
     def llm(self):
         return get_agent_llm(temperature=0.2)
-        
+
     async def review_resume(self, resume_text: str) -> str:
         """Analyzes a resume against industry standards and provides actionable feedback."""
         system_prompt = (
@@ -18,7 +18,7 @@ class CareerAgent:
             SystemMessage(content=system_prompt),
             HumanMessage(content=f"Resume:\n{resume_text}")
         ]
-        
+
         try:
             response = await self.llm.ainvoke(messages)
             return response.content
@@ -32,14 +32,14 @@ class CareerAgent:
             "Identify matched skills and missing skills (skill gaps). Suggest quick ways the candidate "
             "can bridge these gaps."
         )
-        
+
         prompt_content = f"Candidate Skills: {', '.join(resume_skills)}\nJob Requirements: {', '.join(job_requirements)}"
-        
+
         messages = [
             SystemMessage(content=system_prompt),
             HumanMessage(content=prompt_content)
         ]
-        
+
         try:
             response = await self.llm.ainvoke(messages)
             return response.content
@@ -52,13 +52,13 @@ class CareerAgent:
             "You are an expert AI Recruiter. Compare the candidate's resume with the job description. "
             "Output a single match score from 0 to 100 representing the fit, followed by a brief 2-sentence justification."
         )
-        
+
         prompt_content = f"Resume:\n{resume_text}\n\nJob Description:\n{job_description}"
         messages = [
             SystemMessage(content=system_prompt),
             HumanMessage(content=prompt_content)
         ]
-        
+
         try:
             response = await self.llm.ainvoke(messages)
             return response.content
@@ -72,13 +72,13 @@ class CareerAgent:
             "Suggest 3 specific ways the candidate should tailor their resume to better match this role, "
             "and provide an outline for a compelling cover letter."
         )
-        
+
         prompt_content = f"Resume:\n{resume_text}\n\nJob Description:\n{job_description}"
         messages = [
             SystemMessage(content=system_prompt),
             HumanMessage(content=prompt_content)
         ]
-        
+
         try:
             response = await self.llm.ainvoke(messages)
             return response.content
@@ -92,12 +92,12 @@ class CareerAgent:
             "generate 5 likely behavioral or technical interview questions the candidate might face. "
             "Include a brief tip on how to answer each."
         )
-        
+
         messages = [
             SystemMessage(content=system_prompt),
             HumanMessage(content=f"Job Description:\n{job_description}")
         ]
-        
+
         try:
             response = await self.llm.ainvoke(messages)
             return response.content

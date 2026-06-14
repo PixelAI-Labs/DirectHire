@@ -63,17 +63,28 @@ vi.mock('framer-motion', () => ({
     React.createElement(React.Fragment, null, children),
 }))
 
-// Mock lucide-react icons
-vi.mock('lucide-react', () => ({
-  Eye: () => React.createElement('span', null, 'Eye'),
-  EyeOff: () => React.createElement('span', null, 'EyeOff'),
-  CheckCircle: () => React.createElement('span', null, 'Check'),
-  XCircle: () => React.createElement('span', null, 'Error'),
-  Info: () => React.createElement('span', null, 'Info'),
-  X: () => React.createElement('span', null, 'X'),
-  Menu: () => React.createElement('span', null, 'Menu'),
-  Search: () => React.createElement('span', null, 'Search'),
-}))
+// Mock lucide-react icons. Each named export returns a span whose label is the
+// icon name, so tests can assert `getByText('Briefcase')` etc.
+const LUCIDE_ICONS = [
+  'Eye', 'EyeOff', 'CheckCircle', 'XCircle', 'Info', 'X', 'Menu', 'Search',
+  'DollarSign', 'Briefcase', 'Users', 'Calendar', 'Mail', 'TrendingUp', 'RefreshCw', 'Send',
+  'FileText', 'ChevronRight', 'CheckCircle2', 'AlertCircle', 'Bell', 'User',
+  'UserPlus', 'LogIn', 'LogOut', 'Loader', 'Loader2', 'ArrowRight', 'ArrowLeft',
+  'Plus', 'Minus', 'Edit', 'Edit2', 'Trash', 'Trash2', 'Settings', 'LogOut',
+  'Home', 'ChevronLeft', 'ChevronDown', 'ChevronUp', 'Star', 'Heart',
+  'MessageSquare', 'MessageCircle', 'Phone', 'Video', 'MapPin', 'Globe',
+  'Award', 'Target', 'Zap', 'Cpu', 'Code', 'Code2', 'Terminal', 'GitBranch',
+  'Github', 'Linkedin', 'Twitter', 'Facebook', 'Instagram', 'Youtube',
+  'Upload', 'Download', 'Save', 'Copy', 'Share', 'Share2', 'Link', 'ExternalLink',
+  'Filter', 'SortAsc', 'SortDesc', 'MoreHorizontal', 'MoreVertical', 'Menu',
+  'Grid', 'List', 'Columns', 'Rows', 'Maximize', 'Minimize', 'Volume', 'VolumeX',
+  'Play', 'Pause', 'SkipForward', 'SkipBack', 'FastForward', 'Rewind',
+]
+const lucideMock: Record<string, React.FC> = {}
+for (const name of LUCIDE_ICONS) {
+  lucideMock[name] = () => React.createElement('span', null, name)
+}
+vi.mock('lucide-react', () => lucideMock)
 
 // Mock localStorage
 const localStorageMock = (() => {

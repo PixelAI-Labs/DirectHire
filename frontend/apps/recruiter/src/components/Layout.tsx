@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Outlet, useNavigate, Link } from 'react-router-dom'
 import { useToast, NotificationPanel } from '@directhire/shared'
 import { motion } from 'framer-motion'
-import { Menu, X, LogOut, LayoutDashboard, Briefcase, Building2, Users } from 'lucide-react'
+import { Menu, X, LogOut, LayoutDashboard, Briefcase, Building2 } from 'lucide-react'
 
 export const Layout: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -54,7 +54,7 @@ export const Layout: React.FC = () => {
                     <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r from-[#adc6ff] to-[#d0bcff] transition-all duration-200 group-hover:w-full" />
                   </Link>
                 ))}
-                
+
                 {/* Notifications */}
                 {user && <NotificationPanel userId={user.id} />}
 

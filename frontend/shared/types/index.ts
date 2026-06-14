@@ -105,3 +105,34 @@ export interface AgentEvent {
   payload: Record<string, unknown>
   created_at: string
 }
+
+// ─── Analytics (Recruiter Dashboard) ─────────────────────────────────
+
+export interface PipelineStages {
+  applied: number
+  screening: number
+  assessment: number
+  interview: number
+  offer: number
+  rejected: number
+  hired: number
+}
+
+export interface TopCandidate {
+  candidate_id: string
+  full_name: string
+  overall_score: number
+  match_score: number
+  application_status: string
+  skills: string[]
+}
+
+export interface DashboardResponse {
+  open_jobs: number
+  total_candidates: number
+  candidates_in_pipeline: number
+  interviews_this_week: number
+  offers_sent: number
+  pipeline_stages: PipelineStages
+  top_candidates: TopCandidate[]
+}

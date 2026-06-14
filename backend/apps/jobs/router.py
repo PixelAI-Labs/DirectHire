@@ -1,5 +1,5 @@
 """Public Jobs Router"""
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, Query
 from beanie.operators import RegEx, Or, In
 from math import ceil
 
@@ -11,6 +11,7 @@ from apps.recruiter.models import Job
 from apps.jobs.schemas import JobPublicOut, CompanyPublicOut
 from apps.recruiter.schemas import JobOut
 from apps.notifications.service import NotificationService
+from apps.agents.router import _run_match_task
 
 router = APIRouter()
 
@@ -140,6 +141,7 @@ async def get_public_job(id: str):
 @router.post("/{id}/apply", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def apply_to_job(
     id: str,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
 ):
     if current_user.role != UserRole.CANDIDATE:
@@ -147,11 +149,11 @@ async def apply_to_job(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only candidates can apply to jobs",
         )
-        
+
     job = await Job.get(id)
     if not job or job.status != "OPEN":
         raise HTTPException(status_code=404, detail="Job not found or not open")
-        
+
     # Check if already applied
     existing_app = await Application.find_one(
         Application.job_id == id,
@@ -159,13 +161,18 @@ async def apply_to_job(
     )
     if existing_app:
         raise HTTPException(status_code=400, detail="You have already applied to this job")
-        
+
     application = Application(
         job_id=id,
         candidate_id=str(current_user.id),
         status="APPLIED"
     )
     await application.insert()
+
+    # Schedule match scoring in the background so the apply response stays fast.
+    # Resolves review finding #3 — match_score was permanently 0 because no code
+    # was triggering /api/agents/match after an application was created.
+    background_tasks.add_task(_run_match_task, str(current_user.id), id)
 
     # Trigger notifications
     await NotificationService.notify_applied(str(current_user.id), id, job.title)

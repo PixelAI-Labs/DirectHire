@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest'
+import '@testing-library/jest-dom/vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { Input } from '../Input'
 
@@ -17,11 +18,11 @@ describe('Input', () => {
     render(<Input label="Password" type="password" showPasswordToggle data-testid="password-input" />)
     const input = screen.getByTestId('password-input') as HTMLInputElement
     expect(input.type).toBe('password')
-    
+
     const toggle = screen.getByRole('button', { name: /show password/i })
     fireEvent.click(toggle)
     expect(input.type).toBe('text')
-    
+
     fireEvent.click(toggle)
     expect(input.type).toBe('password')
   })

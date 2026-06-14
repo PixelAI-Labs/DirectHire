@@ -66,6 +66,7 @@ backend_exploration_summary.md
 
 # Local review / handoff notes (working, not deliverables)
 backend/review-findings-*.md
+PRD_IMPLEMENTATION_STATUS.md
 
 # Local Agent / IDE Configs & Cache
 .claude/

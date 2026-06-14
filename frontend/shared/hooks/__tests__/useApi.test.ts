@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, waitFor, act } from '@testing-library/react'
+import { renderHook, act } from '@testing-library/react'
 import { useApi } from '../useApi'
 
 // vi.mock factories run BEFORE the module-level `const` declarations execute,
@@ -57,7 +57,7 @@ describe('useApi', () => {
     })
 
     expect(thrown).toBeInstanceOf(Error)
-    expect(thrown?.message).toBe('Network error')
+    expect((thrown as unknown as Error).message).toBe('Network error')
     expect(result.current.error).toBeInstanceOf(Error)
     expect(result.current.error?.message).toBe('Network error')
   })
