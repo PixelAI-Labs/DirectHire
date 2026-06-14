@@ -12,13 +12,20 @@
     "recruiter": "npm run dev --workspace=apps/recruiter",
     "build:candidate": "npm run build --workspace=apps/candidate",
     "build:recruiter": "npm run build --workspace=apps/recruiter",
-    "dev:backend": "cd ../backend && uvicorn main:app --reload --host 0.0.0.0 --port 8000",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "format": "prettier --write ."
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "eslint": "^8.56.0",
+    "jsdom": "^29.1.1",
+    "msw": "^2.14.6",
     "prettier": "^3.2.0",
-    "eslint": "^8.56.0"
+    "vitest": "^4.1.8"
   },
   "engines": {
     "node": ">=20.0.0",

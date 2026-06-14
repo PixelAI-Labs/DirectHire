@@ -1,7 +1,7 @@
-from datetime import timezone
 """Recruiter Models"""
 from beanie import Document
-from datetime import datetime
+from datetime import datetime, timezone
+from pymongo import IndexModel, TEXT
 
 
 class Job(Document):
@@ -21,9 +21,15 @@ class Job(Document):
 
     class Settings:
         name = "jobs"
+        # A text index is required for $text queries (used by /api/jobs/?q=...).
+        # Beanie's text-index support requires an explicit pymongo.IndexModel —
+        # bare tuples like ("title", "text") are interpreted as compound ascending
+        # indexes, which is why $text queries against this collection used to fail.
         indexes = [
-            ("title", "text"),
-            ("description", "text"),
+            IndexModel(
+                [("title", TEXT), ("description", TEXT)],
+                name="title_description_text_idx",
+            ),
         ]
 
 

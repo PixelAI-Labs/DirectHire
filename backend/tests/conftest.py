@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+import io
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
@@ -24,12 +26,9 @@ TEST_PASSWORD_HASH = pwd_context.hash("password123")
 @pytest_asyncio.fixture(scope="session")
 async def db():
     """Setup a test database and initialize Beanie."""
-    # Ensure we use a test database
     assert settings.MONGODB_DB_NAME.endswith("test"), "Must use a test database!"
-    
     client = AsyncIOMotorClient(settings.MONGODB_URL)
     database = client[settings.MONGODB_DB_NAME]
-    
     await init_beanie(
         database=database,
         document_models=[
@@ -38,10 +37,7 @@ async def db():
             Assessment, Interview, Notification
         ]
     )
-    
     yield database
-    
-    # Teardown: drop the test database
     await client.drop_database(settings.MONGODB_DB_NAME)
     client.close()
 
@@ -57,6 +53,7 @@ async def clear_db(db):
     for model in models:
         await model.delete_all()
     yield
+
 
 @pytest_asyncio.fixture
 async def async_client(db):
@@ -103,3 +100,96 @@ def recruiter_token(test_recruiter):
     """Return a valid auth header for the recruiter."""
     token = create_access_token({"sub": test_recruiter.email})
     return {"Authorization": f"Bearer {token}"}
+
+
+# ─── Reusable entity fixtures ────────────────────────────────────────
+
+@pytest_asyncio.fixture
+async def test_company(db, test_recruiter):
+    """Create a company owned by the test recruiter."""
+    company = Company(
+        name="Test Company",
+        description="A test company",
+        website="https://test.com",
+        recruiters=[test_recruiter.email],
+        created_by=str(test_recruiter.id),
+    )
+    await company.insert()
+    test_recruiter.company_id = str(company.id)
+    await test_recruiter.save()
+    return company
+
+
+@pytest_asyncio.fixture
+async def test_job(db, test_recruiter, test_company):
+    """Create an OPEN job under the test company."""
+    job = Job(
+        company_id=str(test_company.id),
+        title="Software Engineer",
+        description="Build great software",
+        requirements=["Python", "FastAPI"],
+        skills=["Python", "React"],
+        location="Remote",
+        salary_min=100000,
+        salary_max=150000,
+        role_type="FULL_TIME",
+        remote_option="HYBRID",
+        status="OPEN",
+    )
+    await job.insert()
+    return job
+
+
+@pytest_asyncio.fixture
+async def test_assessment(db, test_recruiter, test_candidate, test_job):
+    """Create an assessment assigned to the test candidate."""
+    assessment = Assessment(
+        job_id=str(test_job.id),
+        candidate_id=str(test_candidate.id),
+        recruiter_id=str(test_recruiter.id),
+        title="Technical Assessment",
+        questions=["What is Python?", "Explain REST APIs."],
+        status="ASSIGNED",
+    )
+    await assessment.insert()
+    return assessment
+
+
+@pytest_asyncio.fixture
+async def test_interview(db, test_recruiter, test_candidate, test_job):
+    """Create a scheduled interview."""
+    interview = Interview(
+        job_id=str(test_job.id),
+        candidate_id=str(test_candidate.id),
+        recruiter_id=str(test_recruiter.id),
+        scheduled_at=datetime.now(timezone.utc),
+        format="VIDEO",
+        status="SCHEDULED",
+    )
+    await interview.insert()
+    return interview
+
+
+@pytest_asyncio.fixture
+async def test_application(db, test_candidate, test_job):
+    """Create a job application."""
+    application = Application(
+        job_id=str(test_job.id),
+        candidate_id=str(test_candidate.id),
+        status="APPLIED",
+    )
+    await application.insert()
+    return application
+
+
+@pytest.fixture
+def fake_pdf_bytes():
+    """Return minimal valid-looking PDF bytes for upload tests."""
+    return io.BytesIO(b"%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n>>\nendobj\ntrailer\n<<\n/Root 1 0 R\n>>\n%%EOF")
+
+
+@pytest.fixture
+def mock_upload_dir(monkeypatch, tmp_path):
+    """Monkeypatch settings.UPLOAD_DIR to a temporary directory."""
+    monkeypatch.setattr(settings, "UPLOAD_DIR", str(tmp_path))
+    return tmp_path

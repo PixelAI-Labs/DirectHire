@@ -38,6 +38,12 @@ interface ToastProps {
   onRemove: (id: string) => void
 }
 
+// Module-scope counter used when crypto.randomUUID isn't available (older
+// runtimes, some test environments). A module-level counter beats Math.random()
+// because it's strictly monotonic — every id is guaranteed unique within the
+// page's lifetime, which prevents the React duplicate-key warning.
+let _toastIdCounter = 0
+
 const Toast: React.FC<ToastProps> = ({ toast, onRemove }) => {
   const config = toastConfig[toast.type]
   const Icon = config.icon
@@ -81,9 +87,10 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [])
 
   const addToast = useCallback((message: string, type: ToastType = 'info') => {
-    const id = typeof crypto !== 'undefined' && crypto.randomUUID
-      ? crypto.randomUUID()
-      : Math.random().toString(36).slice(2)
+    const id =
+      typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `toast-${++_toastIdCounter}`
     setToasts((prev) => {
       const next = [...prev, { id, message, type }]
       return next.slice(-5)
