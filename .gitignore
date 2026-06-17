@@ -79,3 +79,4 @@ graphify-venv/
 # Local test assets / scripts
 create_resume.py
 dummy_resume.pdf
+screenshots/
