@@ -12,7 +12,7 @@ from apps.auth.models import User, UserRole
 from apps.candidate.models import CandidateProfile, Resume, Application
 from apps.recruiter.models import Job, Ranking, Offer
 from apps.company.models import Company
-from apps.agents.models import AgentEvent
+from apps.agents.models import AgentEvent, CareerAgentReport
 from apps.assessment.models import Assessment
 from apps.interview.models import Interview
 from apps.notifications.models import Notification
@@ -33,7 +33,7 @@ async def db():
         database=database,
         document_models=[
             User, CandidateProfile, Resume, Application,
-            Job, Ranking, Offer, Company, AgentEvent,
+            Job, Ranking, Offer, Company, AgentEvent, CareerAgentReport,
             Assessment, Interview, Notification
         ]
     )
@@ -47,7 +47,7 @@ async def clear_db(db):
     """Clear all collections before each test."""
     models = [
         User, CandidateProfile, Resume, Application,
-        Job, Ranking, Offer, Company, AgentEvent,
+        Job, Ranking, Offer, Company, AgentEvent, CareerAgentReport,
         Assessment, Interview, Notification
     ]
     for model in models:
