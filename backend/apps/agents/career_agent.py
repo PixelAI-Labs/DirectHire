@@ -1,4 +1,5 @@
 """Career Agent"""
+import json
 from langchain_core.messages import SystemMessage, HumanMessage
 from apps.agents.core import get_agent_llm
 
@@ -103,3 +104,55 @@ class CareerAgent:
             return response.content
         except Exception as e:
             return f"Error preparing interview: {e}"
+
+    async def suggest_interview_schedule(self, prompt: str) -> str:
+        """Proxy Liaison sub-agent: suggests interview time slots balancing candidate and recruiter preferences.
+
+        Returns a JSON-encoded list of {start, end, rationale, conflict_risk} objects.
+        """
+        system_prompt = (
+            "You are the Proxy Liaison sub-agent for the DirectHire Career Agent. "
+            "Given the candidate's availability hint, recruiter availability hint, "
+            "and any constraints, propose 3 concrete interview time slots. "
+            "Respond ONLY with valid JSON (no prose, no markdown fences) shaped as: "
+            '{"slots":[{"start":"ISO8601","end":"ISO8601","rationale":"...","conflict_risk":"low|medium|high"}]}'
+        )
+
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=prompt),
+        ]
+
+        try:
+            response = await self.llm.ainvoke(messages)
+            return response.content
+        except Exception as e:
+            return json.dumps({"slots": [], "error": str(e)})
+
+    async def review_offer(self, resume_text: str, offer_json: str) -> str:
+        """Contract Guardian sub-agent: reviews an offer's terms against the candidate's profile.
+
+        Returns a JSON-encoded object with red_flags, green_flags, and negotiation_advice.
+        """
+        system_prompt = (
+            "You are the Contract Guardian sub-agent for the DirectHire Career Agent. "
+            "Review the offer against the candidate's resume and standards. "
+            "Respond ONLY with valid JSON (no prose, no markdown fences) shaped as: "
+            '{"red_flags":["..."],"green_flags":["..."],"negotiation_advice":"..."}'
+        )
+
+        prompt_content = (
+            f"Candidate Resume:\n{resume_text}\n\n"
+            f"Offer Details (JSON):\n{offer_json}"
+        )
+
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=prompt_content),
+        ]
+
+        try:
+            response = await self.llm.ainvoke(messages)
+            return response.content
+        except Exception as e:
+            return json.dumps({"red_flags": [], "green_flags": [], "negotiation_advice": "", "error": str(e)})
